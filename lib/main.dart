@@ -7,7 +7,7 @@ import 'features/detection/presentation/pages/home_page.dart';
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Configurar orientación vertical
+  // Configurar orientación vertical 
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,

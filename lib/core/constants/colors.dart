@@ -23,7 +23,7 @@ class AppColors {
   static const Color greyDark = Color(0xFF424242);
 
   // Semantic colors - Diagnósticos
-  static const Color healthy = Color(0xFF66BB6A);      // Verde - Sano
+  static const Color healthy = Color(0xFF66BB6A);      // Verde - Para Sano
   static const Color manchaNegra = Color(0xFF5D4037);  // Marrón oscuro - Mancha Negra
   static const Color rona = Color(0xFF8D6E63);         // Marrón claro - Roña
   static const Color warning = Color(0xFFFFA726);
