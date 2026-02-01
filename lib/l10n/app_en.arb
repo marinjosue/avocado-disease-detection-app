@@ -1,0 +1,207 @@
+{
+  "@@locale": "en",
+  "appTitle": "Avocado Disease Detection",
+  "@appTitle": {
+    "description": "The title of the application"
+  },
+  "appName": "AvoScan AI",
+  "@appName": {
+    "description": "Application name"
+  },
+  "appVersion": "1.0.0",
+  "@appVersion": {
+    "description": "Application version"
+  },
+  "appDescription": "Early detection of Black Spot and Scab in avocado using convolutional neural networks",
+  "@appDescription": {
+    "description": "Application description"
+  },
+  "hello": "Hello",
+  "@hello": {
+    "description": "A greeting"
+  },
+  "login": "Login",
+  "@login": {
+    "description": "Login button and page title"
+  },
+  "logout": "Logout",
+  "@logout": {
+    "description": "Logout button"
+  },
+  "register": "Register",
+  "@register": {
+    "description": "Register button and page title"
+  },
+  "email": "Email",
+  "@email": {
+    "description": "Email field label"
+  },
+  "password": "Password",
+  "@password": {
+    "description": "Password field label"
+  },
+  "confirmPassword": "Confirm Password",
+  "@confirmPassword": {
+    "description": "Confirm password field label"
+  },
+  "name": "Name",
+  "@name": {
+    "description": "Name field label"
+  },
+  "forgotPassword": "Forgot password?",
+  "@forgotPassword": {
+    "description": "Forgot password link"
+  },
+  "dontHaveAccount": "Don't have an account?",
+  "@dontHaveAccount": {
+    "description": "Sign up prompt"
+  },
+  "alreadyHaveAccount": "Already have an account?",
+  "@alreadyHaveAccount": {
+    "description": "Login prompt"
+  },
+  "settings": "Settings",
+  "@settings": {
+    "description": "Settings page title"
+  },
+  "language": "Language",
+  "@language": {
+    "description": "Language setting"
+  },
+  "profile": "Profile",
+  "@profile": {
+    "description": "Profile label"
+  },
+  "edit": "Edit",
+  "@edit": {
+    "description": "Edit action"
+  },
+  "save": "Save",
+  "@save": {
+    "description": "Save action"
+  },
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Cancel action"
+  },
+  "dashboard": "Dashboard",
+  "@dashboard": {
+    "description": "Dashboard page title"
+  },
+  "camera": "Camera",
+  "@camera": {
+    "description": "Camera page title"
+  },
+  "calculator": "Calculator",
+  "@calculator": {
+    "description": "Calculator page title"
+  },
+  "history": "History",
+  "@history": {
+    "description": "History page title"
+  },
+  "totalAnalyses": "Total Analyses",
+  "@totalAnalyses": {
+    "description": "Total analyses label"
+  },
+  "healthyFruits": "Healthy Fruits",
+  "@healthyFruits": {
+    "description": "Healthy fruits label"
+  },
+  "detectedDiseases": "Detected Diseases",
+  "@detectedDiseases": {
+    "description": "Detected diseases label"
+  },
+  "thisMonth": "This Month",
+  "@thisMonth": {
+    "description": "This month label"
+  },
+  "statistics": "Statistics",
+  "@statistics": {
+    "description": "Statistics label"
+  },
+  "recentActivity": "Recent Activity",
+  "@recentActivity": {
+    "description": "Recent activity label"
+  },
+  "recommendations": "Recommendations",
+  "@recommendations": {
+    "description": "Recommendations label"
+  },
+  "noHistoryFound": "No history found",
+  "@noHistoryFound": {
+    "description": "No history message"
+  },
+  "healthy": "Healthy",
+  "@healthy": {
+    "description": "Healthy status"
+  },
+  "manchaNegra": "Black Spot",
+  "@manchaNegra": {
+    "description": "Black spot disease"
+  },
+  "rona": "Scab",
+  "@rona": {
+    "description": "Scab disease"
+  },
+  "confidence": "Confidence",
+  "@confidence": {
+    "description": "Confidence level"
+  },
+  "offlineMode": "Offline mode - Using local model",
+  "@offlineMode": {
+    "description": "Offline mode message"
+  },
+  "healthCalculator": "Health Calculator",
+  "@healthCalculator": {
+    "description": "Health calculator title"
+  },
+  "totalFruits": "Total Fruits",
+  "@totalFruits": {
+    "description": "Total fruits label"
+  },
+  "calculateHealthScore": "Calculate Health Score",
+  "@calculateHealthScore": {
+    "description": "Calculate health score button"
+  },
+  "healthyPercentage": "Healthy Percentage",
+  "@healthyPercentage": {
+    "description": "Healthy percentage label"
+  },
+  "diseaseIncidence": "Disease Incidence",
+  "@diseaseIncidence": {
+    "description": "Disease incidence label"
+  },
+  "delete": "Delete",
+  "@delete": {
+    "description": "Delete action"
+  },
+  "addWorkspace": "Add Workspace",
+  "@addWorkspace": {
+    "description": "Add workspace action"
+  },
+  "workspaceName": "Workspace Name",
+  "@workspaceName": {
+    "description": "Workspace name label"
+  },
+  "workspaceDescription": "Description",
+  "@workspaceDescription": {
+    "description": "Workspace description label"
+  },
+  "enterName": "Enter name",
+  "@enterName": {
+    "description": "Enter name placeholder"
+  },
+  "optionalDescription": "Optional description",
+  "@optionalDescription": {
+    "description": "Optional description placeholder"
+  },
+  "deleteWorkspace": "Delete Workspace",
+  "@deleteWorkspace": {
+    "description": "Delete workspace title"
+  },
+  "sureDelete": "Are you sure you want to delete",
+  "@sureDelete": {
+    "description": "Delete confirmation message"
+  }
+}

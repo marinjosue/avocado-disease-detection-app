@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class AppColors {
   // Primary colors - Verde aguacate
-  static const Color primary = Color(0xFF4A7C59);
+  static const Color primary = Color.fromARGB(255, 207, 208, 141);
   static const Color primaryLight = Color(0xFF6B9B7C);
   static const Color primaryDark = Color(0xFF2F5233);
 
