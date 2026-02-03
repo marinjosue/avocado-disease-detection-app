@@ -161,4 +161,178 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get sureDelete => '¿Estás seguro de que quieres eliminar';
+
+  @override
+  String get selectImage => 'Selecciona una imagen';
+
+  @override
+  String get takePhoto => 'Tomar Foto';
+
+  @override
+  String get chooseFromGallery => 'Elegir de Galería';
+
+  @override
+  String get analyzeImage => 'Analizar Imagen';
+
+  @override
+  String get analyzing => 'Analizando...';
+
+  @override
+  String get error => 'Error';
+
+  @override
+  String get ok => 'OK';
+
+  @override
+  String get close => 'Cerrar';
+
+  @override
+  String get selectImageError => 'Error al seleccionar imagen';
+
+  @override
+  String get analyzeError => 'Error al analizar imagen';
+
+  @override
+  String get loadFromHistory => 'Cargar desde historial';
+
+  @override
+  String get enterDataManually =>
+      'Ingrese los datos manualmente o cárguelos desde su historial de detecciones';
+
+  @override
+  String get results => 'Resultados';
+
+  @override
+  String get pleaseEnterTotal => 'Por favor ingrese el total de frutos';
+
+  @override
+  String get sumDoesNotMatch => 'La suma de frutos no coincide con el total';
+
+  @override
+  String get recordDeleted => 'Registro eliminado';
+
+  @override
+  String get clearHistory => 'Limpiar historial';
+
+  @override
+  String get sureDeleteAll =>
+      '¿Estás seguro de que quieres eliminar todo el historial?';
+
+  @override
+  String get deleteAll => 'Eliminar todo';
+
+  @override
+  String get historyCleared => 'Historial limpiado';
+
+  @override
+  String get sureDeleteRecord =>
+      '¿Estás seguro de que quieres eliminar este registro?';
+
+  @override
+  String get agoMoment => 'Hace un momento';
+
+  @override
+  String agoMinutes(Object count, Object s) {
+    return 'Hace $count minuto$s';
+  }
+
+  @override
+  String agoHours(Object count, Object s) {
+    return 'Hace $count hora$s';
+  }
+
+  @override
+  String agoDays(Object count, Object s) {
+    return 'Hace $count día$s';
+  }
+
+  @override
+  String get aboutApp => 'Acerca de';
+
+  @override
+  String get version => 'Versión';
+
+  @override
+  String get aboutDescription =>
+      'AvoScan AI - Detección de enfermedades en aguacate';
+
+  @override
+  String get aboutProject => 'Sobre el Proyecto';
+
+  @override
+  String get developedBy => 'Desarrollado como proyecto de tesis';
+
+  @override
+  String get detectedDiseases2 => 'Enfermedades detectadas:';
+
+  @override
+  String get features => 'Características:';
+
+  @override
+  String get realTimeDetection => 'Detección en tiempo real';
+
+  @override
+  String get offlineFunctionality => 'Funcionamiento offline';
+
+  @override
+  String get detectionHistory => 'Historial de detecciones';
+
+  @override
+  String get statisticsAnalysis => 'Estadísticas y análisis';
+
+  @override
+  String get automaticRecommendations => 'Recomendaciones automáticas';
+
+  @override
+  String get multiLanguageSupport => 'Soporte multiidioma';
+
+  @override
+  String get noDataToShow => 'No hay datos para mostrar';
+
+  @override
+  String get excellentHealth => 'Excelente estado fitosanitario';
+
+  @override
+  String get continueCurrentPractices =>
+      'Continuar con las prácticas actuales de manejo';
+
+  @override
+  String get maintainMonitoring => 'Mantener monitoreo preventivo regular';
+
+  @override
+  String get documentPractices => 'Documentar las prácticas exitosas';
+
+  @override
+  String get earlyWarning => 'Nivel de alerta temprana';
+
+  @override
+  String get increaseMonitoring => 'Incrementar frecuencia de monitoreo';
+
+  @override
+  String get considerPreventive =>
+      'Considerar aplicación preventiva de fungicidas';
+
+  @override
+  String get reviewManagement => 'Revisar prácticas de manejo cultural';
+
+  @override
+  String get improveDrainage => 'Mejorar ventilación y drenaje';
+
+  @override
+  String get criticalLevel => 'Nivel crítico - Acción inmediata requerida';
+
+  @override
+  String get applyUrgentTreatment => 'Aplicar tratamiento fungicida urgente';
+
+  @override
+  String get removeInfected => 'Eliminar frutos y material vegetal infectado';
+
+  @override
+  String get improveConditions => 'Mejorar condiciones ambientales';
+
+  @override
+  String get consultSpecialist => 'Consultar con especialista agronómico';
+
+  @override
+  String get implementIPM => 'Implementar plan de manejo integrado';
 }

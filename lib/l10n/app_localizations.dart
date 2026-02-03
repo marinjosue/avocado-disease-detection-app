@@ -403,6 +403,330 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Are you sure you want to delete'**
   String get sureDelete;
+
+  /// No description provided for @selectImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Select an image'**
+  String get selectImage;
+
+  /// No description provided for @takePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Take Photo'**
+  String get takePhoto;
+
+  /// No description provided for @chooseFromGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from Gallery'**
+  String get chooseFromGallery;
+
+  /// No description provided for @analyzeImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyze Image'**
+  String get analyzeImage;
+
+  /// No description provided for @analyzing.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyzing...'**
+  String get analyzing;
+
+  /// No description provided for @error.
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get error;
+
+  /// No description provided for @ok.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get ok;
+
+  /// No description provided for @close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
+
+  /// No description provided for @selectImageError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error selecting image'**
+  String get selectImageError;
+
+  /// No description provided for @analyzeError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error analyzing image'**
+  String get analyzeError;
+
+  /// No description provided for @loadFromHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Load from history'**
+  String get loadFromHistory;
+
+  /// No description provided for @enterDataManually.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter data manually or load from your detection history'**
+  String get enterDataManually;
+
+  /// No description provided for @results.
+  ///
+  /// In en, this message translates to:
+  /// **'Results'**
+  String get results;
+
+  /// No description provided for @pleaseEnterTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter total fruits'**
+  String get pleaseEnterTotal;
+
+  /// No description provided for @sumDoesNotMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'The sum of fruits does not match the total'**
+  String get sumDoesNotMatch;
+
+  /// No description provided for @recordDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Record deleted'**
+  String get recordDeleted;
+
+  /// No description provided for @clearHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear history'**
+  String get clearHistory;
+
+  /// No description provided for @sureDeleteAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete all history?'**
+  String get sureDeleteAll;
+
+  /// No description provided for @deleteAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete all'**
+  String get deleteAll;
+
+  /// No description provided for @historyCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'History cleared'**
+  String get historyCleared;
+
+  /// No description provided for @sureDeleteRecord.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this record?'**
+  String get sureDeleteRecord;
+
+  /// No description provided for @agoMoment.
+  ///
+  /// In en, this message translates to:
+  /// **'Just now'**
+  String get agoMoment;
+
+  /// No description provided for @agoMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} minute{s} ago'**
+  String agoMinutes(Object count, Object s);
+
+  /// No description provided for @agoHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} hour{s} ago'**
+  String agoHours(Object count, Object s);
+
+  /// No description provided for @agoDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} day{s} ago'**
+  String agoDays(Object count, Object s);
+
+  /// No description provided for @aboutApp.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get aboutApp;
+
+  /// No description provided for @version.
+  ///
+  /// In en, this message translates to:
+  /// **'Version'**
+  String get version;
+
+  /// No description provided for @aboutDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'AvoScan AI - Avocado disease detection'**
+  String get aboutDescription;
+
+  /// No description provided for @aboutProject.
+  ///
+  /// In en, this message translates to:
+  /// **'About the Project'**
+  String get aboutProject;
+
+  /// No description provided for @developedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Developed as a thesis project'**
+  String get developedBy;
+
+  /// No description provided for @detectedDiseases2.
+  ///
+  /// In en, this message translates to:
+  /// **'Detected diseases:'**
+  String get detectedDiseases2;
+
+  /// No description provided for @features.
+  ///
+  /// In en, this message translates to:
+  /// **'Features:'**
+  String get features;
+
+  /// No description provided for @realTimeDetection.
+  ///
+  /// In en, this message translates to:
+  /// **'Real-time detection'**
+  String get realTimeDetection;
+
+  /// No description provided for @offlineFunctionality.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline functionality'**
+  String get offlineFunctionality;
+
+  /// No description provided for @detectionHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Detection history'**
+  String get detectionHistory;
+
+  /// No description provided for @statisticsAnalysis.
+  ///
+  /// In en, this message translates to:
+  /// **'Statistics and analysis'**
+  String get statisticsAnalysis;
+
+  /// No description provided for @automaticRecommendations.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic recommendations'**
+  String get automaticRecommendations;
+
+  /// No description provided for @multiLanguageSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Multi-language support'**
+  String get multiLanguageSupport;
+
+  /// No description provided for @noDataToShow.
+  ///
+  /// In en, this message translates to:
+  /// **'No data to display'**
+  String get noDataToShow;
+
+  /// No description provided for @excellentHealth.
+  ///
+  /// In en, this message translates to:
+  /// **'Excellent phytosanitary status'**
+  String get excellentHealth;
+
+  /// No description provided for @continueCurrentPractices.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with current management practices'**
+  String get continueCurrentPractices;
+
+  /// No description provided for @maintainMonitoring.
+  ///
+  /// In en, this message translates to:
+  /// **'Maintain regular preventive monitoring'**
+  String get maintainMonitoring;
+
+  /// No description provided for @documentPractices.
+  ///
+  /// In en, this message translates to:
+  /// **'Document successful practices'**
+  String get documentPractices;
+
+  /// No description provided for @earlyWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Early warning level'**
+  String get earlyWarning;
+
+  /// No description provided for @increaseMonitoring.
+  ///
+  /// In en, this message translates to:
+  /// **'Increase monitoring frequency'**
+  String get increaseMonitoring;
+
+  /// No description provided for @considerPreventive.
+  ///
+  /// In en, this message translates to:
+  /// **'Consider preventive fungicide application'**
+  String get considerPreventive;
+
+  /// No description provided for @reviewManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Review cultural management practices'**
+  String get reviewManagement;
+
+  /// No description provided for @improveDrainage.
+  ///
+  /// In en, this message translates to:
+  /// **'Improve ventilation and drainage'**
+  String get improveDrainage;
+
+  /// No description provided for @criticalLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Critical level - Immediate action required'**
+  String get criticalLevel;
+
+  /// No description provided for @applyUrgentTreatment.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply urgent fungicide treatment'**
+  String get applyUrgentTreatment;
+
+  /// No description provided for @removeInfected.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove infected fruits and plant material'**
+  String get removeInfected;
+
+  /// No description provided for @improveConditions.
+  ///
+  /// In en, this message translates to:
+  /// **'Improve environmental conditions'**
+  String get improveConditions;
+
+  /// No description provided for @consultSpecialist.
+  ///
+  /// In en, this message translates to:
+  /// **'Consult with agronomic specialist'**
+  String get consultSpecialist;
+
+  /// No description provided for @implementIPM.
+  ///
+  /// In en, this message translates to:
+  /// **'Implement integrated pest management (IPM)'**
+  String get implementIPM;
 }
 
 class _AppLocalizationsDelegate

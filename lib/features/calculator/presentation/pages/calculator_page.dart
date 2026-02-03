@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:fl_chart/fl_chart.dart';
+import 'package:provider/provider.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../core/constants/colors.dart';
+import '../../../detection/presentation/providers/detection_provider.dart';
 
 class CalculatorPage extends StatefulWidget {
   const CalculatorPage({Key? key}) : super(key: key);
@@ -10,14 +12,15 @@ class CalculatorPage extends StatefulWidget {
 }
 
 class _CalculatorPageState extends State<CalculatorPage> {
-  final _totalFruitsController = TextEditingController();
-  final _healthyController = TextEditingController();
-  final _manchaNegraController = TextEditingController();
-  final _ronaController = TextEditingController();
+  final TextEditingController _totalFruitsController = TextEditingController();
+  final TextEditingController _healthyController = TextEditingController();
+  final TextEditingController _manchaNegraController = TextEditingController();
+  final TextEditingController _ronaController = TextEditingController();
 
-  double _healthPercentage = 0;
-  double _diseaseIncidence = 0;
-  bool _hasCalculated = false;
+  double _healthyPercentage = 0.0;
+  double _manchaNegraPercentage = 0.0;
+  double _ronaPercentage = 0.0;
+  double _diseaseIncidence = 0.0;
 
   @override
   void dispose() {
@@ -36,24 +39,41 @@ class _CalculatorPageState extends State<CalculatorPage> {
 
     if (total == 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter total number of fruits')),
+        const SnackBar(content: Text('Por favor ingrese el total de frutos')),
       );
       return;
     }
 
-    final counted = healthy + manchaNegra + rona;
-    if (counted > total) {
+    final sum = healthy + manchaNegra + rona;
+    if (sum != total) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Counted fruits cannot exceed total')),
+        const SnackBar(
+          content: Text('La suma de frutos no coincide con el total'),
+        ),
       );
       return;
     }
 
     setState(() {
-      _healthPercentage = (healthy / total) * 100;
+      _healthyPercentage = (healthy / total) * 100;
+      _manchaNegraPercentage = (manchaNegra / total) * 100;
+      _ronaPercentage = (rona / total) * 100;
       _diseaseIncidence = ((manchaNegra + rona) / total) * 100;
-      _hasCalculated = true;
     });
+  }
+
+  void _loadFromHistory() {
+    final provider = context.read<DetectionProvider>();
+    final stats = provider.statistics;
+
+    setState(() {
+      _totalFruitsController.text = stats.totalAnalyses.toString();
+      _healthyController.text = stats.healthyFruits.toString();
+      _manchaNegraController.text = stats.manchaNegraCount.toString();
+      _ronaController.text = stats.ronaCount.toString();
+    });
+
+    _calculate();
   }
 
   void _reset() {
@@ -62,262 +82,160 @@ class _CalculatorPageState extends State<CalculatorPage> {
       _healthyController.clear();
       _manchaNegraController.clear();
       _ronaController.clear();
-      _healthPercentage = 0;
-      _diseaseIncidence = 0;
-      _hasCalculated = false;
+      _healthyPercentage = 0.0;
+      _manchaNegraPercentage = 0.0;
+      _ronaPercentage = 0.0;
+      _diseaseIncidence = 0.0;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    
-    // Definir valores por defecto para las traducciones
-    final healthCalculatorLabel = l10n?.healthCalculator ?? 'Health Calculator';
-    final totalFruitsLabel = l10n?.totalFruits ?? 'Total Fruits';
-    final healthyFruitsLabel = l10n?.healthyFruits ?? 'Healthy Fruits';
-    final manchaNegraLabel = l10n?.manchaNegra ?? 'Black Spot';
-    final ronaLabel = l10n?.rona ?? 'Scab';
-    final calculateHealthScoreLabel = l10n?.calculateHealthScore ?? 'Calculate Health Score';
-    final healthyPercentageLabel = l10n?.healthyPercentage ?? 'Healthy Percentage';
-    final diseaseIncidenceLabel = l10n?.diseaseIncidence ?? 'Disease Incidence';
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
       appBar: AppBar(
-        title: Text(healthCalculatorLabel),
-        backgroundColor: const Color(0xFF2E7D32),
-        foregroundColor: Colors.white,
-        elevation: 0,
+        title: Text(l10n.calculator),
+        backgroundColor: AppColors.primary,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.history),
+            tooltip: 'Cargar desde historial',
+            onPressed: _loadFromHistory,
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Info Card
-            Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
+            Text(
+              l10n.healthCalculator,
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
               ),
-              child: Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  gradient: LinearGradient(
-                    colors: [
-                      const Color(0xFF2E7D32).withOpacity(0.1),
-                      const Color(0xFF66BB6A).withOpacity(0.05),
-                    ],
-                  ),
-                ),
-                child: Column(
-                  children: [
-                    Icon(
-                      Icons.calculate,
-                      size: 64,
-                      color: const Color(0xFF2E7D32),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      healthCalculatorLabel,
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF2E7D32),
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Calculate the health status of your avocado crop based on detected diseases',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[700],
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Ingrese los datos manualmente o cárguelos desde su historial de detecciones',
+              style: TextStyle(
+                fontSize: 14,
+                color: AppColors.textSecondary,
               ),
             ),
             const SizedBox(height: 24),
 
-            // Input Card
-            Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Enter Data',
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    
-                    // Total Fruits
-                    TextField(
-                      controller: _totalFruitsController,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        labelText: totalFruitsLabel,
-                        prefixIcon: const Icon(Icons.agriculture),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        filled: true,
-                        fillColor: Colors.grey[50],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    
-                    // Healthy Fruits
-                    TextField(
-                      controller: _healthyController,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        labelText: healthyFruitsLabel,
-                        prefixIcon: const Icon(Icons.check_circle, color: Color(0xFF388E3C)),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        filled: true,
-                        fillColor: const Color(0xFF388E3C).withOpacity(0.05),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    
-                    // Mancha Negra
-                    TextField(
-                      controller: _manchaNegraController,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        labelText: manchaNegraLabel,
-                        prefixIcon: const Icon(Icons.warning, color: Color(0xFFF57C00)),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        filled: true,
-                        fillColor: const Color(0xFFF57C00).withOpacity(0.05),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    
-                    // Roña
-                    TextField(
-                      controller: _ronaController,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        labelText: ronaLabel,
-                        prefixIcon: const Icon(Icons.error, color: Color(0xFFD32F2F)),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        filled: true,
-                        fillColor: const Color(0xFFD32F2F).withOpacity(0.05),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    
-                    // Buttons
-                    Row(
-                      children: [
-                        Expanded(
-                          child: ElevatedButton.icon(
-                            onPressed: _calculate,
-                            icon: const Icon(Icons.calculate),
-                            label: Text(calculateHealthScoreLabel),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF2E7D32),
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        OutlinedButton(
-                          onPressed: _reset,
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.all(16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: const Icon(Icons.refresh),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
+            // Input Fields
+            _buildTextField(
+              controller: _totalFruitsController,
+              label: l10n.totalFruits,
+              icon: Icons.numbers,
             ),
+            const SizedBox(height: 16),
+            _buildTextField(
+              controller: _healthyController,
+              label: l10n.healthyFruits,
+              icon: Icons.check_circle,
+              color: AppColors.healthy,
+            ),
+            const SizedBox(height: 16),
+            _buildTextField(
+              controller: _manchaNegraController,
+              label: l10n.manchaNegra,
+              icon: Icons.warning,
+              color: AppColors.manchaNegra,
+            ),
+            const SizedBox(height: 16),
+            _buildTextField(
+              controller: _ronaController,
+              label: l10n.rona,
+              icon: Icons.error,
+              color: AppColors.rona,
+            ),
+            const SizedBox(height: 24),
 
-            if (_hasCalculated) ...[
-              const SizedBox(height: 24),
-              
-              // Results Card
-              Card(
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Results',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
+            // Action Buttons
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: _calculate,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      const SizedBox(height: 20),
-                      
-                      // Health Percentage
-                      _buildResultItem(
-                        healthyPercentageLabel,
-                        '${_healthPercentage.toStringAsFixed(1)}%',
-                        const Color(0xFF388E3C),
-                        Icons.check_circle,
-                      ),
-                      const SizedBox(height: 16),
-                      
-                      // Disease Incidence
-                      _buildResultItem(
-                        diseaseIncidenceLabel,
-                        '${_diseaseIncidence.toStringAsFixed(1)}%',
-                        const Color(0xFFD32F2F),
-                        Icons.error,
-                      ),
-                      const SizedBox(height: 24),
-                      
-                      // Chart
-                      SizedBox(
-                        height: 200,
-                        child: _buildPieChart(),
-                      ),
-                      const SizedBox(height: 20),
-                      
-                      // Recommendation
-                      _buildRecommendation(),
-                    ],
+                    ),
+                    child: Text(l10n.calculateHealthScore),
                   ),
                 ),
+                const SizedBox(width: 12),
+                ElevatedButton(
+                  onPressed: _reset,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.greyLight,
+                    foregroundColor: AppColors.textPrimary,
+                    padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Icon(Icons.refresh),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 32),
+
+            // Results
+            if (_healthyPercentage > 0 || _manchaNegraPercentage > 0 || _ronaPercentage > 0) ...[
+              const Divider(),
+              const SizedBox(height: 24),
+              Text(
+                'Resultados',
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
               ),
+              const SizedBox(height: 16),
+              
+              _buildResultCard(
+                l10n.healthyPercentage,
+                _healthyPercentage,
+                AppColors.healthy,
+                Icons.check_circle,
+              ),
+              const SizedBox(height: 12),
+              _buildResultCard(
+                'Mancha Negra',
+                _manchaNegraPercentage,
+                AppColors.manchaNegra,
+                Icons.warning,
+              ),
+              const SizedBox(height: 12),
+              _buildResultCard(
+                'Roña',
+                _ronaPercentage,
+                AppColors.rona,
+                Icons.error,
+              ),
+              const SizedBox(height: 12),
+              _buildResultCard(
+                l10n.diseaseIncidence,
+                _diseaseIncidence,
+                AppColors.warning,
+                Icons.analytics,
+              ),
+
+              const SizedBox(height: 24),
+              _buildRecommendations(),
             ],
           ],
         ),
@@ -325,17 +243,54 @@ class _CalculatorPageState extends State<CalculatorPage> {
     );
   }
 
-  Widget _buildResultItem(String label, String value, Color color, IconData icon) {
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    Color color = AppColors.primary,
+  }) {
+    return TextField(
+      controller: controller,
+      keyboardType: TextInputType.number,
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(icon, color: color),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: color, width: 2),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildResultCard(String label, double percentage, Color color, IconData icon) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withOpacity(0.3), width: 2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         children: [
-          Icon(icon, color: color, size: 32),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: color, size: 24),
+          ),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
@@ -343,14 +298,14 @@ class _CalculatorPageState extends State<CalculatorPage> {
               children: [
                 Text(
                   label,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 14,
-                    color: Colors.grey[700],
+                    color: AppColors.textSecondary,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  value,
+                  '${percentage.toStringAsFixed(1)}%',
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -365,119 +320,68 @@ class _CalculatorPageState extends State<CalculatorPage> {
     );
   }
 
-  Widget _buildPieChart() {
-    final healthy = int.tryParse(_healthyController.text) ?? 0;
-    final manchaNegra = int.tryParse(_manchaNegraController.text) ?? 0;
-    final rona = int.tryParse(_ronaController.text) ?? 0;
-    final total = healthy + manchaNegra + rona;
-
-    if (total == 0) return const SizedBox();
-
-    return PieChart(
-      PieChartData(
-        sectionsSpace: 2,
-        centerSpaceRadius: 40,
-        sections: [
-          if (healthy > 0)
-            PieChartSectionData(
-              value: healthy.toDouble(),
-              title: '${((healthy / total) * 100).toStringAsFixed(1)}%',
-              color: const Color(0xFF388E3C),
-              radius: 60,
-              titleStyle: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-          if (manchaNegra > 0)
-            PieChartSectionData(
-              value: manchaNegra.toDouble(),
-              title: '${((manchaNegra / total) * 100).toStringAsFixed(1)}%',
-              color: const Color(0xFFF57C00),
-              radius: 60,
-              titleStyle: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-          if (rona > 0)
-            PieChartSectionData(
-              value: rona.toDouble(),
-              title: '${((rona / total) * 100).toStringAsFixed(1)}%',
-              color: const Color(0xFFD32F2F),
-              radius: 60,
-              titleStyle: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildRecommendation() {
+  Widget _buildRecommendations() {
     String recommendation;
     Color color;
     IconData icon;
 
-    if (_healthPercentage >= 80) {
-      recommendation = 'Excellent crop health! Continue with current practices. Your avocados show minimal disease presence.';
-      color = const Color(0xFF388E3C);
-      icon = Icons.thumb_up;
-    } else if (_healthPercentage >= 60) {
-      recommendation = 'Good crop health. Monitor affected areas and implement preventive measures to maintain quality.';
-      color = const Color(0xFF66BB6A);
-      icon = Icons.check;
-    } else if (_healthPercentage >= 40) {
-      recommendation = 'Moderate disease incidence detected. Increase monitoring and apply targeted treatments to affected areas.';
-      color = const Color(0xFFF57C00);
+    if (_diseaseIncidence < 10) {
+      recommendation = '''✓ Excelente estado fitosanitario
+✓ Continuar con las prácticas actuales de manejo
+✓ Mantener monitoreo preventivo regular
+✓ Documentar las prácticas exitosas''';
+      color = AppColors.healthy;
+      icon = Icons.check_circle;
+    } else if (_diseaseIncidence < 25) {
+      recommendation = '''⚠ Nivel de alerta temprana
+⚠ Incrementar frecuencia de monitoreo
+⚠ Considerar aplicación preventiva de fungicidas
+⚠ Revisar prácticas de manejo cultural
+⚠ Mejorar ventilación y drenaje''';
+      color = AppColors.warning;
       icon = Icons.warning;
     } else {
-      recommendation = 'Critical: High disease incidence! Immediate intervention required. Consult with agricultural specialists for comprehensive treatment plan.';
-      color = const Color(0xFFD32F2F);
+      recommendation = '''✗ Nivel crítico - Acción inmediata requerida
+✗ Aplicar tratamiento fungicida urgente
+✗ Eliminar frutos y material vegetal infectado
+✗ Mejorar condiciones ambientales
+✗ Consultar con especialista agronómico
+✗ Implementar plan de manejo integrado''';
+      color = AppColors.error;
       icon = Icons.error;
     }
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [color.withOpacity(0.2), color.withOpacity(0.05)],
-        ),
+        color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.5)),
+        border: Border.all(color: color, width: 2),
       ),
-      child: Row(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: color, size: 32),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Recommendation',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: color,
-                  ),
+          Row(
+            children: [
+              Icon(icon, color: color, size: 24),
+              const SizedBox(width: 12),
+              const Text(
+                'Recomendaciones',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  recommendation,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[800],
-                    height: 1.5,
-                  ),
-                ),
-              ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            recommendation,
+            style: const TextStyle(
+              fontSize: 14,
+              color: AppColors.textPrimary,
+              height: 1.6,
             ),
           ),
         ],

@@ -7,9 +7,8 @@ import 'core/constants/colors.dart';
 import 'l10n/app_localizations.dart';
 import 'core/providers/locale_provider.dart';
 import 'core/providers/connectivity_provider.dart';
-import 'features/auth/presentation/providers/auth_provider.dart';
-import 'features/auth/presentation/pages/register_page.dart';
 import 'features/main/presentation/pages/main_page.dart';
+import 'features/detection/presentation/providers/detection_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,14 +30,10 @@ class AvoScanApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => LocaleProvider()),
-        ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => ConnectivityProvider()),
+        ChangeNotifierProvider(create: (_) => DetectionProvider()),
       ],
       child: Consumer<LocaleProvider>(
-
-
-
-
         builder: (context, localeProvider, child) {
           return MaterialApp(
             title: 'AvoScan AI',
@@ -75,7 +70,6 @@ class AvoScanApp extends StatelessWidget {
             initialRoute: '/',
             routes: {
               '/': (context) => const MainPage(),
-              '/register': (context) => const RegisterPage(),
               '/main': (context) => const MainPage(),
             },
           );
@@ -85,25 +79,4 @@ class AvoScanApp extends StatelessWidget {
   }
 }
 
-class AuthWrapper extends StatelessWidget {
-  const AuthWrapper({Key? key}) : super(key: key);
 
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<AuthProvider>(
-      builder: (context, authProvider, _) {
-        // Show loading while checking auth state
-        if (authProvider.isLoading) {
-          return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
-          );
-        }
-        
-        // Always show MainPage, it handles auth internally
-        return const MainPage();
-      },
-    );
-  }
-}

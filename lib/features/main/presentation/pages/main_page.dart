@@ -20,8 +20,8 @@ class _MainPageState extends State<MainPage> {
 
   final List<Widget> _pages = const [
     DashboardPage(),
-    CameraPage(),
     CalculatorPage(),
+    CameraPage(),
     HistoryListPage(),
     SettingsPage(),
   ];
@@ -33,8 +33,8 @@ class _MainPageState extends State<MainPage> {
 
     // Valores por defecto si las localizaciones no están disponibles
     final dashboardLabel = l10n?.dashboard ?? 'Dashboard';
-    final cameraLabel = l10n?.camera ?? 'Camera';
     final calculatorLabel = l10n?.calculator ?? 'Calculator';
+    final cameraLabel = l10n?.camera ?? 'Camera';
     final historyLabel = l10n?.history ?? 'History';
     final settingsLabel = l10n?.settings ?? 'Settings';
     final offlineModeText = l10n?.offlineMode ?? 'Offline mode - Using local model';
@@ -101,6 +101,11 @@ class _MainPageState extends State<MainPage> {
               label: dashboardLabel,
             ),
             BottomNavigationBarItem(
+              icon: const Icon(Icons.calculate),
+              activeIcon: const Icon(Icons.calculate, size: 28),
+              label: calculatorLabel,
+            ),
+            BottomNavigationBarItem(
               icon: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
@@ -119,11 +124,6 @@ class _MainPageState extends State<MainPage> {
                 child: const Icon(Icons.camera_alt, color: Colors.white, size: 24),
               ),
               label: cameraLabel,
-            ),
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.calculate),
-              activeIcon: const Icon(Icons.calculate, size: 28),
-              label: calculatorLabel,
             ),
             BottomNavigationBarItem(
               icon: const Icon(Icons.history),

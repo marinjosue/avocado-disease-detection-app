@@ -161,4 +161,174 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sureDelete => 'Are you sure you want to delete';
+
+  @override
+  String get selectImage => 'Select an image';
+
+  @override
+  String get takePhoto => 'Take Photo';
+
+  @override
+  String get chooseFromGallery => 'Choose from Gallery';
+
+  @override
+  String get analyzeImage => 'Analyze Image';
+
+  @override
+  String get analyzing => 'Analyzing...';
+
+  @override
+  String get error => 'Error';
+
+  @override
+  String get ok => 'OK';
+
+  @override
+  String get close => 'Close';
+
+  @override
+  String get selectImageError => 'Error selecting image';
+
+  @override
+  String get analyzeError => 'Error analyzing image';
+
+  @override
+  String get loadFromHistory => 'Load from history';
+
+  @override
+  String get enterDataManually =>
+      'Enter data manually or load from your detection history';
+
+  @override
+  String get results => 'Results';
+
+  @override
+  String get pleaseEnterTotal => 'Please enter total fruits';
+
+  @override
+  String get sumDoesNotMatch => 'The sum of fruits does not match the total';
+
+  @override
+  String get recordDeleted => 'Record deleted';
+
+  @override
+  String get clearHistory => 'Clear history';
+
+  @override
+  String get sureDeleteAll => 'Are you sure you want to delete all history?';
+
+  @override
+  String get deleteAll => 'Delete all';
+
+  @override
+  String get historyCleared => 'History cleared';
+
+  @override
+  String get sureDeleteRecord => 'Are you sure you want to delete this record?';
+
+  @override
+  String get agoMoment => 'Just now';
+
+  @override
+  String agoMinutes(Object count, Object s) {
+    return '$count minute$s ago';
+  }
+
+  @override
+  String agoHours(Object count, Object s) {
+    return '$count hour$s ago';
+  }
+
+  @override
+  String agoDays(Object count, Object s) {
+    return '$count day$s ago';
+  }
+
+  @override
+  String get aboutApp => 'About';
+
+  @override
+  String get version => 'Version';
+
+  @override
+  String get aboutDescription => 'AvoScan AI - Avocado disease detection';
+
+  @override
+  String get aboutProject => 'About the Project';
+
+  @override
+  String get developedBy => 'Developed as a thesis project';
+
+  @override
+  String get detectedDiseases2 => 'Detected diseases:';
+
+  @override
+  String get features => 'Features:';
+
+  @override
+  String get realTimeDetection => 'Real-time detection';
+
+  @override
+  String get offlineFunctionality => 'Offline functionality';
+
+  @override
+  String get detectionHistory => 'Detection history';
+
+  @override
+  String get statisticsAnalysis => 'Statistics and analysis';
+
+  @override
+  String get automaticRecommendations => 'Automatic recommendations';
+
+  @override
+  String get multiLanguageSupport => 'Multi-language support';
+
+  @override
+  String get noDataToShow => 'No data to display';
+
+  @override
+  String get excellentHealth => 'Excellent phytosanitary status';
+
+  @override
+  String get continueCurrentPractices =>
+      'Continue with current management practices';
+
+  @override
+  String get maintainMonitoring => 'Maintain regular preventive monitoring';
+
+  @override
+  String get documentPractices => 'Document successful practices';
+
+  @override
+  String get earlyWarning => 'Early warning level';
+
+  @override
+  String get increaseMonitoring => 'Increase monitoring frequency';
+
+  @override
+  String get considerPreventive => 'Consider preventive fungicide application';
+
+  @override
+  String get reviewManagement => 'Review cultural management practices';
+
+  @override
+  String get improveDrainage => 'Improve ventilation and drainage';
+
+  @override
+  String get criticalLevel => 'Critical level - Immediate action required';
+
+  @override
+  String get applyUrgentTreatment => 'Apply urgent fungicide treatment';
+
+  @override
+  String get removeInfected => 'Remove infected fruits and plant material';
+
+  @override
+  String get improveConditions => 'Improve environmental conditions';
+
+  @override
+  String get consultSpecialist => 'Consult with agronomic specialist';
+
+  @override
+  String get implementIPM => 'Implement integrated pest management (IPM)';
 }

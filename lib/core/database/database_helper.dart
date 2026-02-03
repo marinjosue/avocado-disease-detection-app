@@ -1,237 +1,263 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import '../../features/detection/data/models/detection_model.dart';
+import '../models/detection_result.dart';
+import '../models/workspace.dart';
 
 class DatabaseHelper {
-  static final DatabaseHelper _instance = DatabaseHelper._internal();
+  static final DatabaseHelper instance = DatabaseHelper._init();
   static Database? _database;
 
-  factory DatabaseHelper() => _instance;
-
-  DatabaseHelper._internal();
+  DatabaseHelper._init();
 
   Future<Database> get database async {
     if (_database != null) return _database!;
-    _database = await _initDatabase();
+    _database = await _initDB('avoscan.db');
     return _database!;
   }
 
-  Future<Database> _initDatabase() async {
-    String path = join(await getDatabasesPath(), 'avoscan.db');
+  Future<Database> _initDB(String filePath) async {
+    final dbPath = await getDatabasesPath();
+    final path = join(dbPath, filePath);
+
     return await openDatabase(
       path,
       version: 1,
-      onCreate: _onCreate,
+      onCreate: _createDB,
     );
   }
 
-  Future<void> _onCreate(Database db, int version) async {
-    // Tabla de usuarios
+  Future _createDB(Database db, int version) async {
+    const idType = 'INTEGER PRIMARY KEY AUTOINCREMENT';
+    const textType = 'TEXT NOT NULL';
+    const textTypeNullable = 'TEXT';
+    const realType = 'REAL NOT NULL';
+    const intType = 'INTEGER NOT NULL';
+
+    // Create Workspaces table
     await db.execute('''
-      CREATE TABLE users(
-        id TEXT PRIMARY KEY,
-        email TEXT NOT NULL,
-        name TEXT NOT NULL,
-        photoUrl TEXT,
-        currentWorkspaceId TEXT,
-        createdAt TEXT NOT NULL,
-        lastLogin TEXT
+      CREATE TABLE workspaces (
+        id $textType,
+        name $textType,
+        description $textTypeNullable,
+        createdAt $textType,
+        updatedAt $textType,
+        isActive $intType,
+        PRIMARY KEY (id)
       )
     ''');
 
-    // Tabla de espacios de trabajo
+    // Create DetectionResults table
     await db.execute('''
-      CREATE TABLE workspaces(
-        id TEXT PRIMARY KEY,
-        userId TEXT NOT NULL,
-        name TEXT NOT NULL,
-        type TEXT NOT NULL,
-        description TEXT,
-        createdAt TEXT NOT NULL,
-        FOREIGN KEY (userId) REFERENCES users(id)
+      CREATE TABLE detection_results (
+        id $idType,
+        diseaseType $textType,
+        confidence $realType,
+        imagePath $textType,
+        timestamp $textType,
+        workspaceId $textTypeNullable,
+        notes $textTypeNullable,
+        FOREIGN KEY (workspaceId) REFERENCES workspaces (id)
       )
     ''');
 
-    // Tabla de detecciones
-    await db.execute('''
-      CREATE TABLE detections(
-        id TEXT PRIMARY KEY,
-        userId TEXT NOT NULL,
-        workspaceId TEXT,
-        imagePath TEXT NOT NULL,
-        disease TEXT NOT NULL,
-        confidence REAL NOT NULL,
-        recommendation TEXT NOT NULL,
-        timestamp TEXT NOT NULL,
-        synced INTEGER DEFAULT 0,
-        FOREIGN KEY (userId) REFERENCES users(id),
-        FOREIGN KEY (workspaceId) REFERENCES workspaces(id)
-      )
-    ''');
-
-    // Tabla de estadísticas por usuario
-    await db.execute('''
-      CREATE TABLE user_stats(
-        userId TEXT PRIMARY KEY,
-        totalAnalyses INTEGER DEFAULT 0,
-        healthyCount INTEGER DEFAULT 0,
-        manchaNegraCount INTEGER DEFAULT 0,
-        ronaCount INTEGER DEFAULT 0,
-        lastUpdated TEXT NOT NULL
-      )
-    ''');
+    // Create default workspace
+    await db.insert('workspaces', {
+      'id': 'default',
+      'name': 'Mi Huerto',
+      'description': 'Espacio de trabajo predeterminado',
+      'createdAt': DateTime.now().toIso8601String(),
+      'updatedAt': DateTime.now().toIso8601String(),
+      'isActive': 1,
+    });
   }
 
-  // Detection operations
-  Future<int> insertDetection(Map<String, dynamic> detection) async {
-    final db = await database;
-    return await db.insert('detections', detection);
+  // === WORKSPACE OPERATIONS ===
+  
+  Future<Workspace> createWorkspace(Workspace workspace) async {
+    final db = await instance.database;
+    await db.insert('workspaces', workspace.toMap());
+    return workspace;
   }
 
-  Future<List<Map<String, dynamic>>> getDetections(String userId, {int? limit}) async {
-    final db = await database;
-    return await db.query(
-      'detections',
-      where: 'userId = ?',
-      whereArgs: [userId],
-      orderBy: 'timestamp DESC',
-      limit: limit,
+  Future<List<Workspace>> getAllWorkspaces() async {
+    final db = await instance.database;
+    final result = await db.query(
+      'workspaces',
+      orderBy: 'createdAt DESC',
+    );
+    return result.map((map) => Workspace.fromMap(map)).toList();
+  }
+
+  Future<Workspace?> getWorkspace(String id) async {
+    final db = await instance.database;
+    final maps = await db.query(
+      'workspaces',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+
+    if (maps.isNotEmpty) {
+      return Workspace.fromMap(maps.first);
+    }
+    return null;
+  }
+
+  Future<int> updateWorkspace(Workspace workspace) async {
+    final db = await instance.database;
+    return db.update(
+      'workspaces',
+      workspace.toMap(),
+      where: 'id = ?',
+      whereArgs: [workspace.id],
     );
   }
 
-  Future<int> deleteDetection(String id) async {
-    final db = await database;
-    return await db.delete('detections', where: 'id = ?', whereArgs: [id]);
-  }
-
-  Future<List<Map<String, dynamic>>> getUnsyncedDetections(String userId) async {
-    final db = await database;
-    return await db.query(
-      'detections',
-      where: 'userId = ? AND synced = 0',
-      whereArgs: [userId],
+  Future<int> deleteWorkspace(String id) async {
+    final db = await instance.database;
+    
+    // Delete all detection results for this workspace
+    await db.delete(
+      'detection_results',
+      where: 'workspaceId = ?',
+      whereArgs: [id],
     );
-  }
-
-  Future<void> markAsSynced(String id) async {
-    final db = await database;
-    await db.update(
-      'detections',
-      {'synced': 1},
+    
+    // Delete the workspace
+    return await db.delete(
+      'workspaces',
       where: 'id = ?',
       whereArgs: [id],
     );
   }
 
-  // User stats operations
-  Future<void> updateUserStats(String userId, String disease) async {
-    final db = await database;
-    
-    final stats = await db.query(
-      'user_stats',
-      where: 'userId = ?',
-      whereArgs: [userId],
-    );
+  // === DETECTION RESULT OPERATIONS ===
 
-    if (stats.isEmpty) {
-      await db.insert('user_stats', {
-        'userId': userId,
-        'totalAnalyses': 1,
-        'healthyCount': disease == 'healthy' ? 1 : 0,
-        'manchaNegraCount': disease == 'manchaNegra' ? 1 : 0,
-        'ronaCount': disease == 'rona' ? 1 : 0,
-        'lastUpdated': DateTime.now().toIso8601String(),
-      });
+  Future<DetectionResult> createDetectionResult(DetectionResult result) async {
+    final db = await instance.database;
+    final id = await db.insert('detection_results', result.toMap());
+    return result.copyWith(id: id);
+  }
+
+  Future<List<DetectionResult>> getAllDetectionResults({String? workspaceId}) async {
+    final db = await instance.database;
+    
+    List<Map<String, dynamic>> maps;
+    
+    if (workspaceId != null) {
+      maps = await db.query(
+        'detection_results',
+        where: 'workspaceId = ?',
+        whereArgs: [workspaceId],
+        orderBy: 'timestamp DESC',
+      );
     } else {
-      final current = stats.first;
-      await db.update(
-        'user_stats',
-        {
-          'totalAnalyses': (current['totalAnalyses'] as int) + 1,
-          'healthyCount': (current['healthyCount'] as int) + (disease == 'healthy' ? 1 : 0),
-          'manchaNegraCount': (current['manchaNegraCount'] as int) + (disease == 'manchaNegra' ? 1 : 0),
-          'ronaCount': (current['ronaCount'] as int) + (disease == 'rona' ? 1 : 0),
-          'lastUpdated': DateTime.now().toIso8601String(),
-        },
-        where: 'userId = ?',
-        whereArgs: [userId],
+      maps = await db.query(
+        'detection_results',
+        orderBy: 'timestamp DESC',
       );
     }
+    
+    return maps.map((map) => DetectionResult.fromMap(map)).toList();
   }
 
-  Future<Map<String, dynamic>?> getUserStats(String userId) async {
-    final db = await database;
-    final stats = await db.query(
-      'user_stats',
-      where: 'userId = ?',
-      whereArgs: [userId],
-    );
-    return stats.isNotEmpty ? stats.first : null;
-  }
-
-  Future<void> clearAllData() async {
-    final db = await database;
-    await db.delete('detections');
-    await db.delete('user_stats');
-    await db.delete('workspaces');
-    await db.delete('users');
-  }
-
-  // User operations
-  Future<int> insertUser(Map<String, dynamic> user) async {
-    final db = await database;
-    return await db.insert('users', user, conflictAlgorithm: ConflictAlgorithm.replace);
-  }
-
-  Future<Map<String, dynamic>?> getUser(String userId) async {
-    final db = await database;
-    final users = await db.query('users', where: 'id = ?', whereArgs: [userId]);
-    return users.isNotEmpty ? users.first : null;
-  }
-
-  Future<int> updateUser(String userId, Map<String, dynamic> updates) async {
-    final db = await database;
-    return await db.update('users', updates, where: 'id = ?', whereArgs: [userId]);
-  }
-
-  Future<int> deleteUser(String userId) async {
-    final db = await database;
-    return await db.delete('users', where: 'id = ?', whereArgs: [userId]);
-  }
-
-  // Workspace operations
-  Future<int> insertWorkspace(Map<String, dynamic> workspace) async {
-    final db = await database;
-    return await db.insert('workspaces', workspace);
-  }
-
-  Future<List<Map<String, dynamic>>> getWorkspaces(String userId) async {
-    final db = await database;
-    return await db.query(
-      'workspaces',
-      where: 'userId = ?',
-      whereArgs: [userId],
-      orderBy: 'createdAt DESC',
-    );
-  }
-
-  Future<Map<String, dynamic>?> getWorkspace(String workspaceId) async {
-    final db = await database;
-    final workspaces = await db.query(
-      'workspaces',
+  Future<DetectionResult?> getDetectionResult(int id) async {
+    final db = await instance.database;
+    final maps = await db.query(
+      'detection_results',
       where: 'id = ?',
-      whereArgs: [workspaceId],
+      whereArgs: [id],
     );
-    return workspaces.isNotEmpty ? workspaces.first : null;
+
+    if (maps.isNotEmpty) {
+      return DetectionResult.fromMap(maps.first);
+    }
+    return null;
   }
 
-  Future<int> updateWorkspace(String workspaceId, Map<String, dynamic> updates) async {
-    final db = await database;
-    return await db.update('workspaces', updates, where: 'id = ?', whereArgs: [workspaceId]);
+  Future<int> updateDetectionResult(DetectionResult result) async {
+    final db = await instance.database;
+    return db.update(
+      'detection_results',
+      result.toMap(),
+      where: 'id = ?',
+      whereArgs: [result.id],
+    );
   }
 
-  Future<int> deleteWorkspace(String workspaceId) async {
-    final db = await database;
-    return await db.delete('workspaces', where: 'id = ?', whereArgs: [workspaceId]);
+  Future<int> deleteDetectionResult(int id) async {
+    final db = await instance.database;
+    return await db.delete(
+      'detection_results',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  Future<int> deleteAllDetectionResults() async {
+    final db = await instance.database;
+    return await db.delete('detection_results');
+  }
+
+  // === STATISTICS ===
+
+  Future<Map<String, int>> getStatistics({String? workspaceId}) async {
+    final db = await instance.database;
+    
+    String whereClause = workspaceId != null ? 'WHERE workspaceId = ?' : '';
+    List<dynamic> whereArgs = workspaceId != null ? [workspaceId] : [];
+    
+    final result = await db.rawQuery('''
+      SELECT 
+        diseaseType,
+        COUNT(*) as count
+      FROM detection_results
+      $whereClause
+      GROUP BY diseaseType
+    ''', whereArgs);
+
+    Map<String, int> statistics = {
+      'healthy': 0,
+      'mancha_negra': 0,
+      'rona': 0,
+    };
+
+    for (var row in result) {
+      statistics[row['diseaseType'] as String] = row['count'] as int;
+    }
+
+    return statistics;
+  }
+
+  Future<List<Map<String, dynamic>>> getDetectionsByDateRange({
+    required DateTime startDate,
+    required DateTime endDate,
+    String? workspaceId,
+  }) async {
+    final db = await instance.database;
+    
+    String whereClause = 'timestamp BETWEEN ? AND ?';
+    List<dynamic> whereArgs = [
+      startDate.toIso8601String(),
+      endDate.toIso8601String(),
+    ];
+    
+    if (workspaceId != null) {
+      whereClause += ' AND workspaceId = ?';
+      whereArgs.add(workspaceId);
+    }
+    
+    final maps = await db.query(
+      'detection_results',
+      where: whereClause,
+      whereArgs: whereArgs,
+      orderBy: 'timestamp DESC',
+    );
+    
+    return maps;
+  }
+
+  Future close() async {
+    final db = await instance.database;
+    db.close();
   }
 }

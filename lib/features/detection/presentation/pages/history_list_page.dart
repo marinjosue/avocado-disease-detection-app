@@ -1,243 +1,183 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../l10n/app_localizations.dart';
-import '../../../../core/database/database_helper.dart';
-import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../../core/constants/colors.dart';
+import '../../../../core/models/detection_result.dart';
+import '../providers/detection_provider.dart';
 
-class HistoryListPage extends StatefulWidget {
+class HistoryListPage extends StatelessWidget {
   const HistoryListPage({Key? key}) : super(key: key);
 
   @override
-  State<HistoryListPage> createState() => _HistoryListPageState();
-}
-
-class _HistoryListPageState extends State<HistoryListPage> {
-  final DatabaseHelper _dbHelper = DatabaseHelper();
-  List<Map<String, dynamic>> _detections = [];
-  bool _isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadDetections();
-  }
-
-  Future<void> _loadDetections() async {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    if (authProvider.currentUser == null) {
-      setState(() {
-        _detections = [];
-        _isLoading = false;
-      });
-      return;
-    }
-
-    setState(() => _isLoading = true);
-
-    final detections = await _dbHelper.getDetections(
-      authProvider.currentUser!.id,
-      limit: 100,
-    );
-
-    setState(() {
-      _detections = detections;
-      _isLoading = false;
-    });
-  }
-
-  Future<void> _deleteDetection(String id, int index) async {
-    await _dbHelper.deleteDetection(id);
-    setState(() {
-      _detections.removeAt(index);
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final historyLabel = l10n?.history ?? 'History';
-    final noHistoryLabel = l10n?.noHistoryFound ?? 'No history found';
-    final healthyLabel = l10n?.healthy ?? 'Healthy';
-    final manchaNegraLabel = l10n?.manchaNegra ?? 'Black Spot';
-    final ronaLabel = l10n?.rona ?? 'Scab';
-    final confidenceLabel = l10n?.confidence ?? 'Confidence';
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
       appBar: AppBar(
-        title: Text(historyLabel),
-        backgroundColor: const Color(0xFF2E7D32),
-        foregroundColor: Colors.white,
-        elevation: 0,
+        title: Text(l10n.history),
+        backgroundColor: AppColors.primary,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.delete_outline),
+            onPressed: () => _showClearHistoryDialog(context, l10n),
+          ),
+        ],
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : RefreshIndicator(
-              onRefresh: _loadDetections,
-              child: _detections.isEmpty
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.history,
-                            size: 80,
-                            color: Colors.grey[400],
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            noHistoryLabel,
-                            style: TextStyle(
-                              fontSize: 18,
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                  : ListView.builder(
-                      padding: const EdgeInsets.all(16),
-                      itemCount: _detections.length,
-                      itemBuilder: (context, index) {
-                        final detection = _detections[index];
-                        return _buildDetectionCard(
-                          detection,
-                          index,
-                          healthyLabel,
-                          manchaNegraLabel,
-                          ronaLabel,
-                          confidenceLabel,
-                        );
-                      },
+      body: Consumer<DetectionProvider>(
+        builder: (context, provider, _) {
+          if (provider.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (provider.detections.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.history,
+                    size: 80,
+                    color: AppColors.grey,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    l10n.noHistoryFound,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: AppColors.textSecondary,
                     ),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          return RefreshIndicator(
+            onRefresh: () => provider.loadDetections(),
+            child: ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: provider.detections.length,
+              itemBuilder: (context, index) {
+                final detection = provider.detections[index];
+                return _buildHistoryItem(context, detection, l10n);
+              },
             ),
+          );
+        },
+      ),
     );
   }
 
-  Widget _buildDetectionCard(
-    Map<String, dynamic> detection,
-    int index,
-    String healthyLabel,
-    String manchaNegraLabel,
-    String ronaLabel,
-    String confidenceLabel,
-  ) {
-    final disease = detection['disease'] as String;
-    final confidence = (detection['confidence'] as double) * 100;
-    final timestamp = DateTime.parse(detection['timestamp'] as String);
-
-    Color diseaseColor;
-    IconData diseaseIcon;
-    String diseaseLabel;
-
-    switch (disease) {
+  Widget _buildHistoryItem(BuildContext context, DetectionResult detection, AppLocalizations l10n) {
+    Color statusColor;
+    IconData icon;
+    
+    switch (detection.diseaseType) {
       case 'healthy':
-        diseaseColor = const Color(0xFF388E3C);
-        diseaseIcon = Icons.check_circle;
-        diseaseLabel = healthyLabel;
+        statusColor = AppColors.healthy;
+        icon = Icons.check_circle;
         break;
-      case 'manchaNegra':
-        diseaseColor = const Color(0xFFF57C00);
-        diseaseIcon = Icons.warning;
-        diseaseLabel = manchaNegraLabel;
+      case 'mancha_negra':
+        statusColor = AppColors.manchaNegra;
+        icon = Icons.warning;
         break;
       case 'rona':
-        diseaseColor = const Color(0xFFD32F2F);
-        diseaseIcon = Icons.error;
-        diseaseLabel = ronaLabel;
+        statusColor = AppColors.rona;
+        icon = Icons.error;
         break;
       default:
-        diseaseColor = Colors.grey;
-        diseaseIcon = Icons.help;
-        diseaseLabel = disease;
+        statusColor = AppColors.grey;
+        icon = Icons.help;
     }
 
-    return Dismissible(
-      key: Key(detection['id'] as String),
-      direction: DismissDirection.endToStart,
-      onDismissed: (direction) {
-        _deleteDetection(detection['id'] as String, index);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Detección eliminada'),
-            backgroundColor: Color(0xFF2E7D32),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
           ),
-        );
-      },
-      background: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        decoration: BoxDecoration(
-          color: const Color(0xFFD32F2F),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
-        child: const Icon(
-          Icons.delete,
-          color: Colors.white,
-          size: 32,
-        ),
+        ],
       ),
-      child: Card(
-        elevation: 2,
-        margin: const EdgeInsets.only(bottom: 12),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: diseaseColor.withOpacity(0.3),
-              width: 2,
-            ),
-          ),
+      child: InkWell(
+        onTap: () => _showDetectionDetails(context, detection, l10n),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
           child: Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: diseaseColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
+              // Image Thumbnail
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: SizedBox(
+                  width: 80,
+                  height: 80,
+                  child: File(detection.imagePath).existsSync()
+                      ? Image.file(
+                          File(detection.imagePath),
+                          fit: BoxFit.cover,
+                        )
+                      : Container(
+                          color: AppColors.greyLight,
+                          child: const Icon(
+                            Icons.image_not_supported,
+                            color: AppColors.grey,
+                          ),
+                        ),
                 ),
-                child: Icon(diseaseIcon, color: diseaseColor, size: 32),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 12),
+              
+              // Detection Info
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      diseaseLabel,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                        color: diseaseColor,
-                      ),
+                    Row(
+                      children: [
+                        Icon(icon, color: statusColor, size: 20),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            detection.getDiseaseNameES(),
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: statusColor,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '$confidenceLabel: ${confidence.toStringAsFixed(1)}%',
-                      style: TextStyle(
+                      '${l10n.confidence}: ${(detection.confidence * 100).toStringAsFixed(1)}%',
+                      style: const TextStyle(
                         fontSize: 14,
-                        color: Colors.grey[700],
+                        color: AppColors.textSecondary,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      _formatTimestamp(timestamp),
-                      style: TextStyle(
+                      _formatDateTime(detection.timestamp),
+                      style: const TextStyle(
                         fontSize: 12,
-                        color: Colors.grey[600],
+                        color: AppColors.textHint,
                       ),
                     ),
                   ],
                 ),
               ),
-              Icon(
-                Icons.chevron_right,
-                color: Colors.grey[400],
+              
+              // Delete Button
+              IconButton(
+                icon: const Icon(Icons.delete_outline, color: AppColors.error),
+                onPressed: () => _showDeleteConfirmation(context, detection, l10n),
               ),
             ],
           ),
@@ -246,18 +186,203 @@ class _HistoryListPageState extends State<HistoryListPage> {
     );
   }
 
-  String _formatTimestamp(DateTime timestamp) {
+  void _showDetectionDetails(BuildContext context, DetectionResult detection, AppLocalizations l10n) {
+    Color statusColor;
+    switch (detection.diseaseType) {
+      case 'healthy':
+        statusColor = AppColors.healthy;
+        break;
+      case 'mancha_negra':
+        statusColor = AppColors.manchaNegra;
+        break;
+      case 'rona':
+        statusColor = AppColors.rona;
+        break;
+      default:
+        statusColor = AppColors.grey;
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Image
+              ClipRRect(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                child: File(detection.imagePath).existsSync()
+                    ? Image.file(
+                        File(detection.imagePath),
+                        width: double.infinity,
+                        height: 300,
+                        fit: BoxFit.cover,
+                      )
+                    : Container(
+                        width: double.infinity,
+                        height: 300,
+                        color: AppColors.greyLight,
+                        child: const Icon(
+                          Icons.image_not_supported,
+                          size: 80,
+                          color: AppColors.grey,
+                        ),
+                      ),
+              ),
+              
+              // Details
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      detection.getDiseaseNameES(),
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: statusColor,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '${l10n.confidence}: ${(detection.confidence * 100).toStringAsFixed(1)}%',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      _formatFullDateTime(detection.timestamp),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: AppColors.textHint,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    const Divider(),
+                    const SizedBox(height: 16),
+                    Text(
+                      l10n.recommendations,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      detection.getRecommendationES(),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: AppColors.textSecondary,
+                        height: 1.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              
+              // Actions
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Cerrar'),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showDeleteConfirmation(BuildContext context, DetectionResult detection, AppLocalizations l10n) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.delete),
+        content: const Text('¿Estás seguro de que quieres eliminar este registro?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () {
+              context.read<DetectionProvider>().deleteDetection(detection.id!);
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Registro eliminado')),
+              );
+            },
+            child: Text(
+              l10n.delete,
+              style: const TextStyle(color: AppColors.error),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showClearHistoryDialog(BuildContext context, AppLocalizations l10n) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Limpiar historial'),
+        content: const Text('¿Estás seguro de que quieres eliminar todo el historial?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () {
+              context.read<DetectionProvider>().clearAllDetections();
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Historial limpiado')),
+              );
+            },
+            child: const Text(
+              'Eliminar todo',
+              style: TextStyle(color: AppColors.error),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatDateTime(DateTime dateTime) {
     final now = DateTime.now();
-    final difference = now.difference(timestamp);
+    final difference = now.difference(dateTime);
 
     if (difference.inDays > 0) {
-      return '${difference.inDays}d ago';
+      return 'Hace ${difference.inDays} día${difference.inDays > 1 ? 's' : ''}';
     } else if (difference.inHours > 0) {
-      return '${difference.inHours}h ago';
+      return 'Hace ${difference.inHours} hora${difference.inHours > 1 ? 's' : ''}';
     } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes}m ago';
+      return 'Hace ${difference.inMinutes} minuto${difference.inMinutes > 1 ? 's' : ''}';
     } else {
-      return 'Just now';
+      return 'Hace un momento';
     }
+  }
+
+  String _formatFullDateTime(DateTime dateTime) {
+    return '${dateTime.day}/${dateTime.month}/${dateTime.year} ${dateTime.hour}:${dateTime.minute.toString().padLeft(2, '0')}';
   }
 }
