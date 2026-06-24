@@ -12,4 +12,13 @@ void main() {
     expect(find.text('87%'), findsOneWidget);
     expect(find.byType(LinearProgressIndicator), findsOneWidget);
   });
+
+  testWidgets('ConfidenceBar muestra label cuando se proporciona', (tester) async {
+    await tester.pumpWidget(MaterialApp(
+      theme: AppTheme.light,
+      home: const Scaffold(body: ConfidenceBar(value: 0.87, label: 'Confianza')),
+    ));
+    expect(find.text('Confianza'), findsOneWidget);
+    expect(find.text('87%'), findsOneWidget);
+  });
 }
