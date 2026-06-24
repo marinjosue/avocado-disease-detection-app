@@ -38,7 +38,7 @@
 - `lib/core/widgets/donut_chart.dart` — **Crear.** `DonutChart`, `DonutSection`.
 - `lib/core/widgets/info_hint.dart` — **Crear.** `InfoHint`.
 - `lib/main.dart` — **Modificar.** Registrar `ThemeProvider`; pasar `theme`/`darkTheme`/`themeMode`.
-- `assets/fonts/Inter-*.ttf` — **Añadir** (binarios) y declarar en `pubspec.yaml`.
+- `assets/fonts/Inter.ttf` — fuente **variable** (ya colocada en setup) y declarar en `pubspec.yaml`.
 - `test/...` — tests por tarea.
 
 ---
@@ -254,37 +254,29 @@ git commit -m "feat(theme): add design tokens and DiseaseColors extension"
 
 **Files:**
 - Create: `lib/core/theme/app_theme.dart`
-- Modify: `pubspec.yaml` (sección `fonts:` y assets de fuente)
-- Add: `assets/fonts/Inter-Regular.ttf`, `Inter-Medium.ttf`, `Inter-SemiBold.ttf`, `Inter-Bold.ttf`, `Inter-ExtraBold.ttf`
+- Modify: `pubspec.yaml` (sección `fonts:`)
+- Usa: `assets/fonts/Inter.ttf` (fuente **variable**, ya descargada en setup)
 - Test: `test/core/theme/app_theme_test.dart`
 
 **Interfaces:**
 - Consumes: `LightTokens`/`DarkTokens`, `DiseaseColors` (Task 1).
 - Produces: `AppTheme.light` / `AppTheme.dark` → `ThemeData` (Material 3, `useMaterial3: true`, `fontFamily: 'Inter'`, `extensions: [DiseaseColors.*]`).
 
-- [ ] **Step 1: Descargar y colocar la fuente Inter**
+- [ ] **Step 1: Verificar la fuente Inter (ya descargada)**
 
-Descarga Inter (SIL OFL) desde https://rsms.me/inter/ o Google Fonts y copia estos archivos a `assets/fonts/`:
-`Inter-Regular.ttf` (400), `Inter-Medium.ttf` (500), `Inter-SemiBold.ttf` (600), `Inter-Bold.ttf` (700), `Inter-ExtraBold.ttf` (800).
+La fuente variable ya está en `assets/fonts/Inter.ttf` (colocada en el setup; Inter es SIL OFL). Verifica:
+Run: `ls assets/fonts/Inter.ttf`
+Expected: el archivo existe (~860 KB).
 
 - [ ] **Step 2: Declarar la fuente en `pubspec.yaml`**
 
-Bajo `flutter:`, junto a `assets:`, añade:
+Bajo `flutter:`, junto a `assets:`, añade (fuente **variable**: un solo archivo; Flutter mapea `FontWeight` al eje `wght`):
 
 ```yaml
   fonts:
     - family: Inter
       fonts:
-        - asset: assets/fonts/Inter-Regular.ttf
-          weight: 400
-        - asset: assets/fonts/Inter-Medium.ttf
-          weight: 500
-        - asset: assets/fonts/Inter-SemiBold.ttf
-          weight: 600
-        - asset: assets/fonts/Inter-Bold.ttf
-          weight: 700
-        - asset: assets/fonts/Inter-ExtraBold.ttf
-          weight: 800
+        - asset: assets/fonts/Inter.ttf
 ```
 
 Run: `flutter pub get`
