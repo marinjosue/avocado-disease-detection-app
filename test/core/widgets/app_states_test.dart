@@ -27,4 +27,16 @@ void main() {
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
     expect(find.text('Analizando…'), findsOneWidget);
   });
+
+  testWidgets('ErrorState muestra mensaje y botón de acción', (tester) async {
+    var tapped = false;
+    await tester.pumpWidget(_wrap(ErrorState(
+      message: 'Algo salió mal',
+      actionLabel: 'Reintentar',
+      onAction: () => tapped = true,
+    )));
+    expect(find.text('Algo salió mal'), findsOneWidget);
+    await tester.tap(find.text('Reintentar'));
+    expect(tapped, true);
+  });
 }

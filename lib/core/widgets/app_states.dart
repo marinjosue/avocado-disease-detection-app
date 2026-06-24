@@ -10,6 +10,7 @@ class EmptyState extends StatelessWidget {
     this.message,
     this.actionLabel,
     this.onAction,
+    this.actionIcon,
   });
 
   final IconData icon;
@@ -17,6 +18,7 @@ class EmptyState extends StatelessWidget {
   final String? message;
   final String? actionLabel;
   final VoidCallback? onAction;
+  final IconData? actionIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +38,10 @@ class EmptyState extends StatelessWidget {
             ],
             if (actionLabel != null && onAction != null) ...[
               const SizedBox(height: AppSpacing.xl),
-              FilledButton.icon(onPressed: onAction, icon: const Icon(Icons.add_a_photo), label: Text(actionLabel!)),
+              if (actionIcon != null)
+                FilledButton.icon(onPressed: onAction, icon: Icon(actionIcon), label: Text(actionLabel!))
+              else
+                FilledButton(onPressed: onAction, child: Text(actionLabel!)),
             ],
           ],
         ),
