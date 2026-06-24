@@ -97,6 +97,12 @@ flutter:
     - assets/icons/
     - assets/animations/
     - assets/models/
-  
+
+  # Fonts
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter.ttf
+
   # Generación automática de archivos de localización
   generate: true
