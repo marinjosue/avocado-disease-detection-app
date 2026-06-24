@@ -1,30 +1,37 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:aplication_tesis/main.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:aplication_tesis/core/providers/theme_provider.dart';
+import 'package:aplication_tesis/core/theme/app_theme.dart';
 
 void main() {
-  testWidgets('AvoScan AI smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const AvoScanApp());
+  TestWidgetsFlutterBinding.ensureInitialized();
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+  testWidgets('MaterialApp refleja el ThemeMode del provider', (tester) async {
+    SharedPreferences.setMockInitialValues({});
+    final provider = ThemeProvider();
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
+    await tester.pumpWidget(
+      ChangeNotifierProvider.value(
+        value: provider,
+        child: Consumer<ThemeProvider>(
+          builder: (_, p, __) => MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            themeMode: p.themeMode,
+            home: const Scaffold(body: Text('AvoScan')),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('AvoScan'), findsOneWidget);
+
+    await provider.setThemeMode(ThemeMode.dark);
     await tester.pump();
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    final app = tester.widget<MaterialApp>(find.byType(MaterialApp));
+    expect(app.themeMode, ThemeMode.dark);
   });
 }
