@@ -9,7 +9,8 @@ class StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = Theme.of(context).extension<DiseaseColors>()!.forType(diseaseType);
+    final theme = Theme.of(context);
+    final color = theme.extension<DiseaseColors>()!.forType(diseaseType);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 5),
       decoration: BoxDecoration(
@@ -21,7 +22,7 @@ class StatusBadge extends StatelessWidget {
         children: [
           Icon(diseaseIcon(diseaseType), size: 14, color: color),
           const SizedBox(width: 6),
-          Text(label, style: TextStyle(color: color, fontWeight: FontWeight.w600, fontSize: 12)),
+          Text(label, style: theme.textTheme.bodySmall?.copyWith(color: color, fontWeight: FontWeight.w600)),
         ],
       ),
     );
@@ -36,7 +37,8 @@ class AppChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = color ?? Theme.of(context).colorScheme.primary;
+    final theme = Theme.of(context);
+    final c = color ?? theme.colorScheme.primary;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 5),
       decoration: BoxDecoration(
@@ -47,7 +49,7 @@ class AppChip extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (icon != null) ...[Icon(icon, size: 14, color: c), const SizedBox(width: 6)],
-          Text(label, style: TextStyle(color: c, fontWeight: FontWeight.w600, fontSize: 12)),
+          Text(label, style: theme.textTheme.bodySmall?.copyWith(color: c, fontWeight: FontWeight.w600)),
         ],
       ),
     );
