@@ -13,7 +13,7 @@ void main() {
   });
 
   test('lerp interpola entre dos extensiones', () {
-    final mixed = DiseaseColors.light.lerp(DiseaseColors.dark, 0.5)!;
+    final mixed = DiseaseColors.light.lerp(DiseaseColors.dark, 0.5);
     expect(mixed, isA<DiseaseColors>());
   });
 

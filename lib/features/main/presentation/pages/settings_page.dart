@@ -5,7 +5,7 @@ import '../../../../core/constants/colors.dart';
 import '../../../../core/providers/locale_provider.dart';
 
 class SettingsPage extends StatelessWidget {
-  const SettingsPage({Key? key}) : super(key: key);
+  const SettingsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +56,7 @@ class SettingsPage extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha:0.05),
                   blurRadius: 10,
                   offset: const Offset(0, 2),
                 ),
@@ -180,50 +180,46 @@ class SettingsPage extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha:0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
         ],
       ),
-      child: Column(
-        children: [
-          RadioListTile<String>(
-            title: const Row(
-              children: [
-                Text('🇪🇸', style: TextStyle(fontSize: 24)),
-                SizedBox(width: 12),
-                Text('Español'),
-              ],
+      child: RadioGroup<String>(
+        groupValue: currentLocale,
+        onChanged: (value) {
+          if (value != null) {
+            localeProvider.setLocale(Locale(value));
+          }
+        },
+        child: Column(
+          children: [
+            RadioListTile<String>(
+              title: const Row(
+                children: [
+                  Text('🇪🇸', style: TextStyle(fontSize: 24)),
+                  SizedBox(width: 12),
+                  Text('Español'),
+                ],
+              ),
+              value: 'es',
+              activeColor: AppColors.primary,
             ),
-            value: 'es',
-            groupValue: currentLocale,
-            activeColor: AppColors.primary,
-            onChanged: (value) {
-              if (value != null) {
-                localeProvider.setLocale(Locale(value));
-              }
-            },
-          ),
-          const Divider(height: 1),
-          RadioListTile<String>(
-            title: const Row(
-              children: [
-                Text('🇺🇸', style: TextStyle(fontSize: 24)),
-                SizedBox(width: 12),
-                Text('English'),
-              ],
+            const Divider(height: 1),
+            RadioListTile<String>(
+              title: const Row(
+                children: [
+                  Text('🇺🇸', style: TextStyle(fontSize: 24)),
+                  SizedBox(width: 12),
+                  Text('English'),
+                ],
+              ),
+              value: 'en',
+              activeColor: AppColors.primary,
             ),
-            value: 'en',
-            groupValue: currentLocale,
-            activeColor: AppColors.primary,
-            onChanged: (value) {
-              if (value != null) {
-                localeProvider.setLocale(Locale(value));
-              }
-            },
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -240,7 +236,7 @@ class SettingsPage extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha:0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),

@@ -11,7 +11,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 
 class CameraPage extends StatefulWidget {
-  const CameraPage({Key? key}) : super(key: key);
+  const CameraPage({super.key});
 
   @override
   State<CameraPage> createState() => _CameraPageState();
@@ -54,6 +54,7 @@ class _CameraPageState extends State<CameraPage> {
         });
       }
     } catch (e) {
+      if (!mounted) return;
       final l10n = AppLocalizations.of(context)!;
       _showErrorDialog('${l10n.selectImageError}: $e');
     }
@@ -92,6 +93,7 @@ class _CameraPageState extends State<CameraPage> {
       setState(() {
         _isProcessing = false;
       });
+      if (!mounted) return;
       final l10n = AppLocalizations.of(context)!;
       _showErrorDialog('${l10n.analyzeError}: $e');
     }
@@ -328,7 +330,7 @@ class _CameraPageState extends State<CameraPage> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha:0.1),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -342,7 +344,7 @@ class _CameraPageState extends State<CameraPage> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.1),
+                  color: statusColor.withValues(alpha:0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(

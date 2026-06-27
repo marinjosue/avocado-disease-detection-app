@@ -9,7 +9,7 @@ import '../../../detection/presentation/pages/history_list_page.dart';
 import 'settings_page.dart';
 
 class MainPage extends StatefulWidget {
-  const MainPage({Key? key}) : super(key: key);
+  const MainPage({super.key});
 
   @override
   State<MainPage> createState() => _MainPageState();
@@ -78,7 +78,7 @@ class _MainPageState extends State<MainPage> {
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withValues(alpha:0.1),
               blurRadius: 10,
               offset: const Offset(0, -2),
             ),
@@ -115,7 +115,7 @@ class _MainPageState extends State<MainPage> {
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF2E7D32).withOpacity(0.3),
+                      color: const Color(0xFF2E7D32).withValues(alpha:0.3),
                       blurRadius: 8,
                       spreadRadius: 2,
                     ),

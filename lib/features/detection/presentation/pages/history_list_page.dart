@@ -7,7 +7,7 @@ import '../../../../core/models/detection_result.dart';
 import '../providers/detection_provider.dart';
 
 class HistoryListPage extends StatelessWidget {
-  const HistoryListPage({Key? key}) : super(key: key);
+  const HistoryListPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -98,7 +98,7 @@ class HistoryListPage extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha:0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
