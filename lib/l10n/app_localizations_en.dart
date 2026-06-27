@@ -12,7 +12,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appTitle => 'Avocado Disease Detection';
 
   @override
-  String get appName => 'AvoScan AI';
+  String get appName => 'avocadoIA';
 
   @override
   String get appVersion => '1.0.0';
@@ -67,7 +67,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get edit => 'Edit';
 
   @override
-  String get save => 'Save';
+  String get save => 'Save result';
 
   @override
   String get cancel => 'Cancel';
@@ -175,7 +175,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get analyzeImage => 'Analyze Image';
 
   @override
-  String get analyzing => 'Analyzing...';
+  String get analyzing => 'Analyzing…';
 
   @override
   String get error => 'Error';
@@ -331,4 +331,87 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get implementIPM => 'Implement integrated pest management (IPM)';
+
+  @override
+  String get appearance => 'Appearance';
+
+  @override
+  String get themeLight => 'Light';
+
+  @override
+  String get themeDark => 'Dark';
+
+  @override
+  String get themeSystem => 'System';
+
+  @override
+  String get distribution => 'Distribution';
+
+  @override
+  String get emptyDashboardTitle => 'No analyses yet';
+
+  @override
+  String get emptyDashboardMessage => 'Take a photo of a fruit to start.';
+
+  @override
+  String get takeFirstPhoto => 'Take a photo';
+
+  @override
+  String get emptyHistoryTitle => 'No history yet';
+
+  @override
+  String get emptyHistoryMessage => 'Your detections will appear here.';
+
+  @override
+  String get confidenceHint => 'How sure the analysis is (0–100%).';
+
+  @override
+  String get viewTutorial => 'View tutorial again';
+
+  @override
+  String get confirmDeleteTitle => 'Delete record?';
+
+  @override
+  String get confirmDeleteMessage =>
+      'This detection will be permanently removed.';
+
+  @override
+  String get confirmClearTitle => 'Clear history?';
+
+  @override
+  String get confirmClearMessage =>
+      'All detections will be permanently removed.';
+
+  @override
+  String get newDetection => 'New detection';
+
+  @override
+  String get onbWelcomeTitle => 'Welcome to avocadoIA';
+
+  @override
+  String get onbWelcomeBody =>
+      'Detect Black Spot and Scab in avocado from a photo.';
+
+  @override
+  String get onbPhotoTitle => 'Take a good photo';
+
+  @override
+  String get onbPhotoBody =>
+      'Good light, get close to the fruit, keep it in focus.';
+
+  @override
+  String get onbResultsTitle => 'See results and tips';
+
+  @override
+  String get onbResultsBody =>
+      'Review the diagnosis, recommendations and your history.';
+
+  @override
+  String get onbSkip => 'Skip';
+
+  @override
+  String get onbNext => 'Next';
+
+  @override
+  String get onbStart => 'Get started';
 }

@@ -107,7 +107,7 @@ abstract class AppLocalizations {
   /// Application name
   ///
   /// In en, this message translates to:
-  /// **'AvoScan AI'**
+  /// **'avocadoIA'**
   String get appName;
 
   /// Application version
@@ -215,7 +215,7 @@ abstract class AppLocalizations {
   /// Save action
   ///
   /// In en, this message translates to:
-  /// **'Save'**
+  /// **'Save result'**
   String get save;
 
   /// Cancel action
@@ -431,7 +431,7 @@ abstract class AppLocalizations {
   /// No description provided for @analyzing.
   ///
   /// In en, this message translates to:
-  /// **'Analyzing...'**
+  /// **'Analyzing…'**
   String get analyzing;
 
   /// No description provided for @error.
@@ -727,6 +727,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Implement integrated pest management (IPM)'**
   String get implementIPM;
+
+  /// No description provided for @appearance.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get appearance;
+
+  /// No description provided for @themeLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get themeLight;
+
+  /// No description provided for @themeDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get themeDark;
+
+  /// No description provided for @themeSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get themeSystem;
+
+  /// No description provided for @distribution.
+  ///
+  /// In en, this message translates to:
+  /// **'Distribution'**
+  String get distribution;
+
+  /// No description provided for @emptyDashboardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No analyses yet'**
+  String get emptyDashboardTitle;
+
+  /// No description provided for @emptyDashboardMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Take a photo of a fruit to start.'**
+  String get emptyDashboardMessage;
+
+  /// No description provided for @takeFirstPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Take a photo'**
+  String get takeFirstPhoto;
+
+  /// No description provided for @emptyHistoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No history yet'**
+  String get emptyHistoryTitle;
+
+  /// No description provided for @emptyHistoryMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your detections will appear here.'**
+  String get emptyHistoryMessage;
+
+  /// No description provided for @confidenceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'How sure the analysis is (0–100%).'**
+  String get confidenceHint;
+
+  /// No description provided for @viewTutorial.
+  ///
+  /// In en, this message translates to:
+  /// **'View tutorial again'**
+  String get viewTutorial;
+
+  /// No description provided for @confirmDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete record?'**
+  String get confirmDeleteTitle;
+
+  /// No description provided for @confirmDeleteMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This detection will be permanently removed.'**
+  String get confirmDeleteMessage;
+
+  /// No description provided for @confirmClearTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear history?'**
+  String get confirmClearTitle;
+
+  /// No description provided for @confirmClearMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'All detections will be permanently removed.'**
+  String get confirmClearMessage;
+
+  /// No description provided for @newDetection.
+  ///
+  /// In en, this message translates to:
+  /// **'New detection'**
+  String get newDetection;
+
+  /// No description provided for @onbWelcomeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to avocadoIA'**
+  String get onbWelcomeTitle;
+
+  /// No description provided for @onbWelcomeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Detect Black Spot and Scab in avocado from a photo.'**
+  String get onbWelcomeBody;
+
+  /// No description provided for @onbPhotoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Take a good photo'**
+  String get onbPhotoTitle;
+
+  /// No description provided for @onbPhotoBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Good light, get close to the fruit, keep it in focus.'**
+  String get onbPhotoBody;
+
+  /// No description provided for @onbResultsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'See results and tips'**
+  String get onbResultsTitle;
+
+  /// No description provided for @onbResultsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Review the diagnosis, recommendations and your history.'**
+  String get onbResultsBody;
+
+  /// No description provided for @onbSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get onbSkip;
+
+  /// No description provided for @onbNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get onbNext;
+
+  /// No description provided for @onbStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Get started'**
+  String get onbStart;
 }
 
 class _AppLocalizationsDelegate

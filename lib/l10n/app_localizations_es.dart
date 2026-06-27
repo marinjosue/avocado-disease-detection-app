@@ -12,7 +12,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get appTitle => 'Detección de Enfermedades del Aguacate';
 
   @override
-  String get appName => 'AvoScan AI';
+  String get appName => 'avocadoIA';
 
   @override
   String get appVersion => '1.0.0';
@@ -67,7 +67,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get edit => 'Editar';
 
   @override
-  String get save => 'Guardar';
+  String get save => 'Guardar resultado';
 
   @override
   String get cancel => 'Cancelar';
@@ -175,7 +175,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get analyzeImage => 'Analizar Imagen';
 
   @override
-  String get analyzing => 'Analizando...';
+  String get analyzing => 'Analizando…';
 
   @override
   String get error => 'Error';
@@ -335,4 +335,85 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get implementIPM => 'Implementar plan de manejo integrado';
+
+  @override
+  String get appearance => 'Apariencia';
+
+  @override
+  String get themeLight => 'Claro';
+
+  @override
+  String get themeDark => 'Oscuro';
+
+  @override
+  String get themeSystem => 'Automático';
+
+  @override
+  String get distribution => 'Distribución';
+
+  @override
+  String get emptyDashboardTitle => 'Aún no hay análisis';
+
+  @override
+  String get emptyDashboardMessage => 'Toma una foto de un fruto para empezar.';
+
+  @override
+  String get takeFirstPhoto => 'Tomar foto';
+
+  @override
+  String get emptyHistoryTitle => 'Aún no hay historial';
+
+  @override
+  String get emptyHistoryMessage => 'Tus detecciones aparecerán aquí.';
+
+  @override
+  String get confidenceHint => 'Qué tan seguro está el análisis (0–100%).';
+
+  @override
+  String get viewTutorial => 'Ver tutorial de nuevo';
+
+  @override
+  String get confirmDeleteTitle => '¿Eliminar registro?';
+
+  @override
+  String get confirmDeleteMessage =>
+      'Esta detección se eliminará permanentemente.';
+
+  @override
+  String get confirmClearTitle => '¿Limpiar historial?';
+
+  @override
+  String get confirmClearMessage => 'Se eliminarán todas las detecciones.';
+
+  @override
+  String get newDetection => 'Nueva detección';
+
+  @override
+  String get onbWelcomeTitle => 'Bienvenido a avocadoIA';
+
+  @override
+  String get onbWelcomeBody =>
+      'Detecta Mancha Negra y Roña en aguacate desde una foto.';
+
+  @override
+  String get onbPhotoTitle => 'Toma una buena foto';
+
+  @override
+  String get onbPhotoBody => 'Buena luz, acerca el fruto y mantenlo enfocado.';
+
+  @override
+  String get onbResultsTitle => 'Mira resultados y consejos';
+
+  @override
+  String get onbResultsBody =>
+      'Revisa el diagnóstico, las recomendaciones y tu historial.';
+
+  @override
+  String get onbSkip => 'Saltar';
+
+  @override
+  String get onbNext => 'Siguiente';
+
+  @override
+  String get onbStart => 'Empezar';
 }

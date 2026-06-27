@@ -4,7 +4,7 @@
   "@appTitle": {
     "description": "The title of the application"
   },
-  "appName": "AvoScan AI",
+  "appName": "avocadoIA",
   "@appName": {
     "description": "Application name"
   },
@@ -76,7 +76,7 @@
   "@edit": {
     "description": "Edit action"
   },
-  "save": "Save",
+  "save": "Save result",
   "@save": {
     "description": "Save action"
   },
@@ -208,7 +208,7 @@
   "takePhoto": "Take Photo",
   "chooseFromGallery": "Choose from Gallery",
   "analyzeImage": "Analyze Image",
-  "analyzing": "Analyzing...",
+  "analyzing": "Analyzing…",
   "error": "Error",
   "ok": "OK",
   "close": "Close",
@@ -225,7 +225,7 @@
   "deleteAll": "Delete all",
   "historyCleared": "History cleared",
   "sureDeleteRecord": "Are you sure you want to delete this record?",
-  "agoMoment": "A moment ago",
+  "agoMoment": "Just now",
   "agoMinutes": "{count} minute{s} ago",
   "agoHours": "{count} hour{s} ago",
   "agoDays": "{count} day{s} ago",
@@ -242,7 +242,7 @@
   "statisticsAnalysis": "Statistics and analysis",
   "automaticRecommendations": "Automatic recommendations",
   "multiLanguageSupport": "Multi-language support",
-  "noDataToShow": "No data to show",
+  "noDataToShow": "No data to display",
   "excellentHealth": "Excellent phytosanitary status",
   "continueCurrentPractices": "Continue with current management practices",
   "maintainMonitoring": "Maintain regular preventive monitoring",
@@ -258,6 +258,30 @@
   "improveConditions": "Improve environmental conditions",
   "consultSpecialist": "Consult with agronomic specialist",
   "implementIPM": "Implement integrated pest management (IPM)",
-  "noDataToShow": "No data to display",
-  "agoMoment": "Just now"
+  "appearance": "Appearance",
+  "themeLight": "Light",
+  "themeDark": "Dark",
+  "themeSystem": "System",
+  "distribution": "Distribution",
+  "emptyDashboardTitle": "No analyses yet",
+  "emptyDashboardMessage": "Take a photo of a fruit to start.",
+  "takeFirstPhoto": "Take a photo",
+  "emptyHistoryTitle": "No history yet",
+  "emptyHistoryMessage": "Your detections will appear here.",
+  "confidenceHint": "How sure the analysis is (0–100%).",
+  "viewTutorial": "View tutorial again",
+  "confirmDeleteTitle": "Delete record?",
+  "confirmDeleteMessage": "This detection will be permanently removed.",
+  "confirmClearTitle": "Clear history?",
+  "confirmClearMessage": "All detections will be permanently removed.",
+  "newDetection": "New detection",
+  "onbWelcomeTitle": "Welcome to avocadoIA",
+  "onbWelcomeBody": "Detect Black Spot and Scab in avocado from a photo.",
+  "onbPhotoTitle": "Take a good photo",
+  "onbPhotoBody": "Good light, get close to the fruit, keep it in focus.",
+  "onbResultsTitle": "See results and tips",
+  "onbResultsBody": "Review the diagnosis, recommendations and your history.",
+  "onbSkip": "Skip",
+  "onbNext": "Next",
+  "onbStart": "Get started"
 }
