@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../l10n/app_localizations.dart';
-import '../../../../core/constants/colors.dart';
 import '../../../../core/providers/locale_provider.dart';
+import '../../../../core/providers/theme_provider.dart';
+import '../../../../core/widgets/section_header.dart';
+import '../../../../core/widgets/theme_mode_selector.dart';
+import '../../../../core/services/onboarding_service.dart';
+import '../../../../core/theme/app_tokens.dart';
+import '../../../onboarding/presentation/pages/onboarding_page.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -10,188 +15,148 @@ class SettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.settings),
-        backgroundColor: AppColors.primary,
       ),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         children: [
-          // Language Section
-          _buildSectionHeader(l10n.language),
-          const SizedBox(height: 8),
-          _buildLanguageSelector(context),
-          
-          const SizedBox(height: 24),
-          const Divider(),
-          const SizedBox(height: 24),
+          // ── Apariencia ──────────────────────────────────────────────────
+          SectionHeader(title: l10n.appearance),
+          const SizedBox(height: AppSpacing.sm),
+          ThemeModeSelector(
+            value: context.watch<ThemeProvider>().themeMode,
+            onChanged: (m) => context.read<ThemeProvider>().setThemeMode(m),
+            lightLabel: l10n.themeLight,
+            darkLabel: l10n.themeDark,
+            systemLabel: l10n.themeSystem,
+          ),
 
-          // App Info Section
-          _buildSectionHeader(l10n.aboutApp),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.xl),
+          const Divider(),
+          const SizedBox(height: AppSpacing.xl),
+
+          // ── Idioma ──────────────────────────────────────────────────────
+          SectionHeader(title: l10n.language),
+          const SizedBox(height: AppSpacing.sm),
+          _buildLanguageSelector(context),
+
+          const SizedBox(height: AppSpacing.xl),
+          const Divider(),
+          const SizedBox(height: AppSpacing.xl),
+
+          // ── Acerca de ───────────────────────────────────────────────────
+          SectionHeader(title: l10n.aboutApp),
+          const SizedBox(height: AppSpacing.sm),
           _buildInfoTile(
+            context,
             icon: Icons.info_outline,
             title: l10n.version,
             subtitle: '1.0.0',
           ),
           _buildInfoTile(
+            context,
             icon: Icons.description,
             title: l10n.aboutApp,
             subtitle: l10n.aboutDescription,
           ),
-          
-          const SizedBox(height: 24),
-          const Divider(),
-          const SizedBox(height: 24),
+          _buildTutorialTile(context, l10n),
 
-          // About Section
-          _buildSectionHeader(l10n.aboutProject),
-          const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha:0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.appName,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+          const SizedBox(height: AppSpacing.xl),
+          const Divider(),
+          const SizedBox(height: AppSpacing.xl),
+
+          // ── Sobre el proyecto ───────────────────────────────────────────
+          SectionHeader(title: l10n.aboutProject),
+          const SizedBox(height: AppSpacing.md),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.appName,
+                    style: theme.textTheme.titleMedium,
                   ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  l10n.appDescription,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: AppColors.textSecondary,
-                    height: 1.5,
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    l10n.appDescription,
+                    style: theme.textTheme.bodySmall,
                   ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  l10n.detectedDiseases2,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+                  const SizedBox(height: AppSpacing.md),
+                  Text(
+                    l10n.detectedDiseases2,
+                    style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '• ${l10n.manchaNegra} (Black Spot)\n'
-                  '• ${l10n.rona} (Scab)\n'
-                  '• ${l10n.healthy}',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: AppColors.textSecondary,
-                    height: 1.5,
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    '• ${l10n.manchaNegra} (Black Spot)\n'
+                    '• ${l10n.rona} (Scab)\n'
+                    '• ${l10n.healthy}',
+                    style: theme.textTheme.bodySmall,
                   ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  l10n.features,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+                  const SizedBox(height: AppSpacing.md),
+                  Text(
+                    l10n.features,
+                    style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '✓ ${l10n.realTimeDetection}\n'
-                  '✓ ${l10n.offlineFunctionality}\n'
-                  '✓ ${l10n.detectionHistory}\n'
-                  '✓ ${l10n.statisticsAnalysis}\n'
-                  '✓ ${l10n.automaticRecommendations}\n'
-                  '✓ ${l10n.multiLanguageSupport}',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: AppColors.textSecondary,
-                    height: 1.5,
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    '✓ ${l10n.realTimeDetection}\n'
+                    '✓ ${l10n.offlineFunctionality}\n'
+                    '✓ ${l10n.detectionHistory}\n'
+                    '✓ ${l10n.statisticsAnalysis}\n'
+                    '✓ ${l10n.automaticRecommendations}\n'
+                    '✓ ${l10n.multiLanguageSupport}',
+                    style: theme.textTheme.bodySmall,
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: AppSpacing.xl),
 
-          // Credits
+          // ── Créditos ────────────────────────────────────────────────────
           Center(
             child: Column(
               children: [
                 Text(
                   l10n.developedBy,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textHint,
-                  ),
+                  style: theme.textTheme.bodySmall,
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: AppSpacing.xs),
                 Text(
                   'ESPE ${DateTime.now().year}',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textHint,
+                  style: theme.textTheme.bodySmall?.copyWith(
                     fontWeight: FontWeight.bold,
+                    color: cs.onSurface,
                   ),
                 ),
               ],
             ),
           ),
+          const SizedBox(height: AppSpacing.xl),
         ],
-      ),
-    );
-  }
-
-  Widget _buildSectionHeader(String title) {
-    return Text(
-      title,
-      style: const TextStyle(
-        fontSize: 16,
-        fontWeight: FontWeight.bold,
-        color: AppColors.textPrimary,
       ),
     );
   }
 
   Widget _buildLanguageSelector(BuildContext context) {
-    final localeProvider = Provider.of<LocaleProvider>(context);
+    final localeProvider = context.watch<LocaleProvider>();
     final currentLocale = localeProvider.locale.languageCode;
+    final cs = Theme.of(context).colorScheme;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha:0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+    return Card(
       child: RadioGroup<String>(
         groupValue: currentLocale,
         onChanged: (value) {
-          if (value != null) {
-            localeProvider.setLocale(Locale(value));
-          }
+          if (value != null) localeProvider.setLocale(Locale(value));
         },
         child: Column(
           children: [
@@ -204,7 +169,7 @@ class SettingsPage extends StatelessWidget {
                 ],
               ),
               value: 'es',
-              activeColor: AppColors.primary,
+              activeColor: cs.primary,
             ),
             const Divider(height: 1),
             RadioListTile<String>(
@@ -216,7 +181,7 @@ class SettingsPage extends StatelessWidget {
                 ],
               ),
               value: 'en',
-              activeColor: AppColors.primary,
+              activeColor: cs.primary,
             ),
           ],
         ),
@@ -224,39 +189,42 @@ class SettingsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoTile({
+  Widget _buildInfoTile(
+    BuildContext context, {
     required IconData icon,
     required String title,
     required String subtitle,
   }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha:0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+    final cs = Theme.of(context).colorScheme;
+    return Card(
+      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: ListTile(
-        leading: Icon(icon, color: AppColors.primary),
-        title: Text(
-          title,
-          style: const TextStyle(
-            fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        subtitle: Text(
-          subtitle,
-          style: const TextStyle(
-            color: AppColors.textSecondary,
-          ),
-        ),
+        leading: Icon(icon, color: cs.primary),
+        title: Text(title, style: Theme.of(context).textTheme.titleMedium),
+        subtitle: Text(subtitle, style: Theme.of(context).textTheme.bodySmall),
+      ),
+    );
+  }
+
+  Widget _buildTutorialTile(BuildContext context, AppLocalizations l10n) {
+    final cs = Theme.of(context).colorScheme;
+    return Card(
+      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+      child: ListTile(
+        leading: Icon(Icons.school, color: cs.primary),
+        title: Text(l10n.viewTutorial, style: Theme.of(context).textTheme.titleMedium),
+        trailing: Icon(Icons.chevron_right, color: cs.onSurfaceVariant),
+        onTap: () async {
+          await OnboardingService().reset();
+          if (!context.mounted) return;
+          await Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => OnboardingPage(
+                onFinish: () => Navigator.of(context).pop(),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
