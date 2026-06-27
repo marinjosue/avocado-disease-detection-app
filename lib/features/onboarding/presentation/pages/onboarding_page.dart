@@ -4,6 +4,8 @@ import 'package:aplication_tesis/core/theme/app_tokens.dart';
 import 'package:aplication_tesis/core/widgets/app_buttons.dart';
 import 'package:aplication_tesis/l10n/app_localizations.dart';
 
+const double _kSlideIconSize = 72;
+
 /// Data for a single onboarding slide.
 class _SlideData {
   const _SlideData({required this.icon, required this.title, required this.body});
@@ -40,6 +42,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
   Future<void> _finish() async {
     await OnboardingService().markSeen();
+    if (!mounted) return;
     widget.onFinish?.call();
   }
 
@@ -188,7 +191,7 @@ class _SlidePage extends StatelessWidget {
             ),
             child: Icon(
               slide.icon,
-              size: 72,
+              size: _kSlideIconSize,
               color: cs.onPrimaryContainer,
             ),
           ),

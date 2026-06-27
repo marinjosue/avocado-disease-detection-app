@@ -64,13 +64,26 @@ class AvoScanApp extends StatelessWidget {
 /// - loading  → themed [CircularProgressIndicator]
 /// - not seen → [OnboardingPage] (navigates to `/main` on finish)
 /// - seen     → [MainPage] directly
-class _OnboardingBootstrap extends StatelessWidget {
+class _OnboardingBootstrap extends StatefulWidget {
   const _OnboardingBootstrap();
+
+  @override
+  State<_OnboardingBootstrap> createState() => _OnboardingBootstrapState();
+}
+
+class _OnboardingBootstrapState extends State<_OnboardingBootstrap> {
+  late final Future<bool> _future;
+
+  @override
+  void initState() {
+    super.initState();
+    _future = OnboardingService().hasSeen();
+  }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<bool>(
-      future: OnboardingService().hasSeen(),
+      future: _future,
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return Scaffold(
