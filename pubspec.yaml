@@ -39,7 +39,7 @@ dependencies:
   # Almacenamiento local y base de datos
   sqflite: ^2.3.0
   path_provider: ^2.1.1
-  shared_preferences: ^2.2.2
+  shared_preferences: ^2.5.5   # 16 KB page-size compliant (datastore native lib)
   
   # Autenticación y manejo de usuarios
   firebase_core: ^3.6.0
