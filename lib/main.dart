@@ -7,7 +7,9 @@ import 'core/theme/app_theme.dart';
 import 'core/providers/locale_provider.dart';
 import 'core/providers/connectivity_provider.dart';
 import 'core/providers/theme_provider.dart';
+import 'core/services/onboarding_service.dart';
 import 'features/main/presentation/pages/main_page.dart';
+import 'features/onboarding/presentation/pages/onboarding_page.dart';
 import 'features/detection/presentation/providers/detection_provider.dart';
 
 void main() async {
@@ -46,12 +48,47 @@ class AvoScanApp extends StatelessWidget {
             themeMode: themeProvider.themeMode,
             initialRoute: '/',
             routes: {
-              '/': (context) => const MainPage(),
+              '/': (context) => const _OnboardingBootstrap(),
               '/main': (context) => const MainPage(),
             },
           );
         },
       ),
+    );
+  }
+}
+
+/// Bootstrap widget for the `'/'` route.
+///
+/// Checks [OnboardingService.hasSeen()] and routes accordingly:
+/// - loading  → themed [CircularProgressIndicator]
+/// - not seen → [OnboardingPage] (navigates to `/main` on finish)
+/// - seen     → [MainPage] directly
+class _OnboardingBootstrap extends StatelessWidget {
+  const _OnboardingBootstrap();
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<bool>(
+      future: OnboardingService().hasSeen(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+          );
+        }
+        if (snapshot.data == true) {
+          return const MainPage();
+        }
+        return OnboardingPage(
+          onFinish: () =>
+              Navigator.of(context).pushReplacementNamed('/main'),
+        );
+      },
     );
   }
 }
