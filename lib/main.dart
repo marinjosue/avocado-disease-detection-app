@@ -36,7 +36,7 @@ class AvoScanApp extends StatelessWidget {
       child: Consumer2<LocaleProvider, ThemeProvider>(
         builder: (context, localeProvider, themeProvider, child) {
           return MaterialApp(
-            title: 'AvoScan AI',
+            title: 'avocadoIA',
             debugShowCheckedModeBanner: false,
             locale: localeProvider.locale,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
