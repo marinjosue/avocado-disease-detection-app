@@ -2,8 +2,12 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../l10n/app_localizations.dart';
-import '../../../../core/constants/colors.dart';
 import '../../../../core/models/detection_result.dart';
+import '../../../../core/theme/disease_colors.dart';
+import '../../../../core/widgets/app_states.dart';
+import '../../../../core/widgets/confidence_bar.dart';
+import '../../../../core/widgets/detection_tile.dart';
+import '../../../../core/widgets/section_header.dart';
 import '../providers/detection_provider.dart';
 
 class HistoryListPage extends StatelessWidget {
@@ -16,7 +20,6 @@ class HistoryListPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.history),
-        backgroundColor: AppColors.primary,
         actions: [
           IconButton(
             icon: const Icon(Icons.delete_outline),
@@ -31,25 +34,10 @@ class HistoryListPage extends StatelessWidget {
           }
 
           if (provider.detections.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.history,
-                    size: 80,
-                    color: AppColors.grey,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    l10n.noHistoryFound,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
+            return EmptyState(
+              icon: Icons.history,
+              title: l10n.emptyHistoryTitle,
+              message: l10n.emptyHistoryMessage,
             );
           }
 
@@ -59,8 +47,17 @@ class HistoryListPage extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               itemCount: provider.detections.length,
               itemBuilder: (context, index) {
-                final detection = provider.detections[index];
-                return _buildHistoryItem(context, detection, l10n);
+                final d = provider.detections[index];
+                final diseaseName = l10n.localeName == 'es'
+                    ? d.getDiseaseNameES()
+                    : d.getDiseaseNameEN();
+                return DetectionTile(
+                  result: d,
+                  diseaseName: diseaseName,
+                  timeLabel: _formatDateTime(d.timestamp),
+                  onTap: () => _showDetectionDetails(context, d, l10n),
+                  onDelete: () => _showDeleteConfirmation(context, d, l10n),
+                );
               },
             ),
           );
@@ -69,138 +66,17 @@ class HistoryListPage extends StatelessWidget {
     );
   }
 
-  Widget _buildHistoryItem(BuildContext context, DetectionResult detection, AppLocalizations l10n) {
-    Color statusColor;
-    IconData icon;
-    
-    switch (detection.diseaseType) {
-      case 'healthy':
-        statusColor = AppColors.healthy;
-        icon = Icons.check_circle;
-        break;
-      case 'mancha_negra':
-        statusColor = AppColors.manchaNegra;
-        icon = Icons.warning;
-        break;
-      case 'rona':
-        statusColor = AppColors.rona;
-        icon = Icons.error;
-        break;
-      default:
-        statusColor = AppColors.grey;
-        icon = Icons.help;
-    }
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha:0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: InkWell(
-        onTap: () => _showDetectionDetails(context, detection, l10n),
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            children: [
-              // Image Thumbnail
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: SizedBox(
-                  width: 80,
-                  height: 80,
-                  child: File(detection.imagePath).existsSync()
-                      ? Image.file(
-                          File(detection.imagePath),
-                          fit: BoxFit.cover,
-                        )
-                      : Container(
-                          color: AppColors.greyLight,
-                          child: const Icon(
-                            Icons.image_not_supported,
-                            color: AppColors.grey,
-                          ),
-                        ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              
-              // Detection Info
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(icon, color: statusColor, size: 20),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            detection.getDiseaseNameES(),
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: statusColor,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${l10n.confidence}: ${(detection.confidence * 100).toStringAsFixed(1)}%',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      _formatDateTime(detection.timestamp),
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: AppColors.textHint,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              
-              // Delete Button
-              IconButton(
-                icon: const Icon(Icons.delete_outline, color: AppColors.error),
-                onPressed: () => _showDeleteConfirmation(context, detection, l10n),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _showDetectionDetails(BuildContext context, DetectionResult detection, AppLocalizations l10n) {
-    Color statusColor;
-    switch (detection.diseaseType) {
-      case 'healthy':
-        statusColor = AppColors.healthy;
-        break;
-      case 'mancha_negra':
-        statusColor = AppColors.manchaNegra;
-        break;
-      case 'rona':
-        statusColor = AppColors.rona;
-        break;
-      default:
-        statusColor = AppColors.grey;
-    }
+  void _showDetectionDetails(
+      BuildContext context, DetectionResult detection, AppLocalizations l10n) {
+    final diseaseColors = Theme.of(context).extension<DiseaseColors>()!;
+    final statusColor = diseaseColors.forType(detection.diseaseType);
+    final diseaseName = l10n.localeName == 'es'
+        ? detection.getDiseaseNameES()
+        : detection.getDiseaseNameEN();
+    final recommendation = l10n.localeName == 'es'
+        ? detection.getRecommendationES()
+        : detection.getRecommendationEN();
+    final file = File(detection.imagePath);
 
     showDialog(
       context: context,
@@ -215,26 +91,27 @@ class HistoryListPage extends StatelessWidget {
             children: [
               // Image
               ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                child: File(detection.imagePath).existsSync()
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(16)),
+                child: file.existsSync()
                     ? Image.file(
-                        File(detection.imagePath),
+                        file,
                         width: double.infinity,
-                        height: 300,
+                        height: 260,
                         fit: BoxFit.cover,
                       )
                     : Container(
                         width: double.infinity,
-                        height: 300,
-                        color: AppColors.greyLight,
-                        child: const Icon(
-                          Icons.image_not_supported,
+                        height: 260,
+                        color: statusColor.withValues(alpha: 0.08),
+                        child: Icon(
+                          diseaseIcon(detection.diseaseType),
                           size: 80,
-                          color: AppColors.grey,
+                          color: statusColor.withValues(alpha: 0.5),
                         ),
                       ),
               ),
-              
+
               // Details
               Padding(
                 padding: const EdgeInsets.all(20),
@@ -242,53 +119,37 @@ class HistoryListPage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      detection.getDiseaseNameES(),
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: statusColor,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '${l10n.confidence}: ${(detection.confidence * 100).toStringAsFixed(1)}%',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        color: AppColors.textSecondary,
-                      ),
+                      diseaseName,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            color: statusColor,
+                            fontWeight: FontWeight.w700,
+                          ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       _formatFullDateTime(detection.timestamp),
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: AppColors.textHint,
-                      ),
+                      style: Theme.of(context).textTheme.bodySmall,
                     ),
                     const SizedBox(height: 16),
-                    const Divider(),
-                    const SizedBox(height: 16),
-                    Text(
-                      l10n.recommendations,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
-                      ),
+                    ConfidenceBar(
+                      value: detection.confidence,
+                      color: statusColor,
+                      label: l10n.confidence,
                     ),
+                    const SizedBox(height: 20),
+                    SectionHeader(title: l10n.recommendations),
                     const SizedBox(height: 8),
                     Text(
-                      detection.getRecommendationES(),
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: AppColors.textSecondary,
-                        height: 1.5,
-                      ),
+                      recommendation,
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyMedium
+                          ?.copyWith(height: 1.5),
                     ),
                   ],
                 ),
               ),
-              
+
               // Actions
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
@@ -297,7 +158,7 @@ class HistoryListPage extends StatelessWidget {
                   children: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: const Text('Cerrar'),
+                      child: Text(l10n.close),
                     ),
                   ],
                 ),
@@ -309,12 +170,13 @@ class HistoryListPage extends StatelessWidget {
     );
   }
 
-  void _showDeleteConfirmation(BuildContext context, DetectionResult detection, AppLocalizations l10n) {
+  void _showDeleteConfirmation(
+      BuildContext context, DetectionResult detection, AppLocalizations l10n) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(l10n.delete),
-        content: const Text('¿Estás seguro de que quieres eliminar este registro?'),
+        title: Text(l10n.confirmDeleteTitle),
+        content: Text(l10n.confirmDeleteMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -325,12 +187,13 @@ class HistoryListPage extends StatelessWidget {
               context.read<DetectionProvider>().deleteDetection(detection.id!);
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Registro eliminado')),
+                SnackBar(content: Text(l10n.recordDeleted)),
               );
             },
             child: Text(
               l10n.delete,
-              style: const TextStyle(color: AppColors.error),
+              style: TextStyle(
+                  color: Theme.of(context).colorScheme.error),
             ),
           ),
         ],
@@ -342,8 +205,8 @@ class HistoryListPage extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Limpiar historial'),
-        content: const Text('¿Estás seguro de que quieres eliminar todo el historial?'),
+        title: Text(l10n.confirmClearTitle),
+        content: Text(l10n.confirmClearMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -354,12 +217,13 @@ class HistoryListPage extends StatelessWidget {
               context.read<DetectionProvider>().clearAllDetections();
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Historial limpiado')),
+                SnackBar(content: Text(l10n.historyCleared)),
               );
             },
-            child: const Text(
-              'Eliminar todo',
-              style: TextStyle(color: AppColors.error),
+            child: Text(
+              l10n.deleteAll,
+              style: TextStyle(
+                  color: Theme.of(context).colorScheme.error),
             ),
           ),
         ],
@@ -383,6 +247,7 @@ class HistoryListPage extends StatelessWidget {
   }
 
   String _formatFullDateTime(DateTime dateTime) {
-    return '${dateTime.day}/${dateTime.month}/${dateTime.year} ${dateTime.hour}:${dateTime.minute.toString().padLeft(2, '0')}';
+    return '${dateTime.day}/${dateTime.month}/${dateTime.year} '
+        '${dateTime.hour}:${dateTime.minute.toString().padLeft(2, '0')}';
   }
 }
