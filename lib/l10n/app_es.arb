@@ -133,5 +133,15 @@
   "onbStart": "Empezar",
   "navDashboard": "Panel",
   "navCalculator": "Calc.",
-  "navSettings": "Ajustes"
+  "navSettings": "Ajustes",
+  "assistant": "Asistente IA",
+  "navAssistant": "Asistente",
+  "askAI": "Preguntar a la IA",
+  "assistantDisclaimer": "Orientativo — no sustituye a un agrónomo certificado.",
+  "assistantTalkingAbout": "Sobre",
+  "assistantGeneralGreeting": "¡Hola! Pregúntame sobre enfermedades del aguacate, tratamientos o tu huerto.",
+  "chatInputHint": "Escribe tu pregunta…",
+  "send": "Enviar",
+  "assistantThinking": "Pensando…",
+  "assistantPlaceholderReply": "Aún estoy aprendiendo. Por ahora puedo explicar resultados de detección y cuidados generales."
 }

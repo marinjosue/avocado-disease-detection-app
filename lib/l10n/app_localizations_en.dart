@@ -423,4 +423,37 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get navSettings => 'Settings';
+
+  @override
+  String get assistant => 'AI Assistant';
+
+  @override
+  String get navAssistant => 'Assistant';
+
+  @override
+  String get askAI => 'Ask the AI';
+
+  @override
+  String get assistantDisclaimer =>
+      'Guidance only — not a substitute for a certified agronomist.';
+
+  @override
+  String get assistantTalkingAbout => 'About';
+
+  @override
+  String get assistantGeneralGreeting =>
+      'Hi! Ask me about avocado diseases, treatments, or your orchard.';
+
+  @override
+  String get chatInputHint => 'Type your question…';
+
+  @override
+  String get send => 'Send';
+
+  @override
+  String get assistantThinking => 'Thinking…';
+
+  @override
+  String get assistantPlaceholderReply =>
+      'I\'m still learning. For now I can explain detection results and general care.';
 }

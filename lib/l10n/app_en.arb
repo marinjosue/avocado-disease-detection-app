@@ -286,5 +286,15 @@
   "onbStart": "Get started",
   "navDashboard": "Dashboard",
   "navCalculator": "Calculator",
-  "navSettings": "Settings"
+  "navSettings": "Settings",
+  "assistant": "AI Assistant",
+  "navAssistant": "Assistant",
+  "askAI": "Ask the AI",
+  "assistantDisclaimer": "Guidance only — not a substitute for a certified agronomist.",
+  "assistantTalkingAbout": "About",
+  "assistantGeneralGreeting": "Hi! Ask me about avocado diseases, treatments, or your orchard.",
+  "chatInputHint": "Type your question…",
+  "send": "Send",
+  "assistantThinking": "Thinking…",
+  "assistantPlaceholderReply": "I'm still learning. For now I can explain detection results and general care."
 }

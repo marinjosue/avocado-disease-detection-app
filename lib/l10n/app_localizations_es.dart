@@ -425,4 +425,37 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get navSettings => 'Ajustes';
+
+  @override
+  String get assistant => 'Asistente IA';
+
+  @override
+  String get navAssistant => 'Asistente';
+
+  @override
+  String get askAI => 'Preguntar a la IA';
+
+  @override
+  String get assistantDisclaimer =>
+      'Orientativo — no sustituye a un agrónomo certificado.';
+
+  @override
+  String get assistantTalkingAbout => 'Sobre';
+
+  @override
+  String get assistantGeneralGreeting =>
+      '¡Hola! Pregúntame sobre enfermedades del aguacate, tratamientos o tu huerto.';
+
+  @override
+  String get chatInputHint => 'Escribe tu pregunta…';
+
+  @override
+  String get send => 'Enviar';
+
+  @override
+  String get assistantThinking => 'Pensando…';
+
+  @override
+  String get assistantPlaceholderReply =>
+      'Aún estoy aprendiendo. Por ahora puedo explicar resultados de detección y cuidados generales.';
 }

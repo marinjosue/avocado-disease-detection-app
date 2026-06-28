@@ -901,6 +901,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Settings'**
   String get navSettings;
+
+  /// No description provided for @assistant.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Assistant'**
+  String get assistant;
+
+  /// No description provided for @navAssistant.
+  ///
+  /// In en, this message translates to:
+  /// **'Assistant'**
+  String get navAssistant;
+
+  /// No description provided for @askAI.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask the AI'**
+  String get askAI;
+
+  /// No description provided for @assistantDisclaimer.
+  ///
+  /// In en, this message translates to:
+  /// **'Guidance only — not a substitute for a certified agronomist.'**
+  String get assistantDisclaimer;
+
+  /// No description provided for @assistantTalkingAbout.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get assistantTalkingAbout;
+
+  /// No description provided for @assistantGeneralGreeting.
+  ///
+  /// In en, this message translates to:
+  /// **'Hi! Ask me about avocado diseases, treatments, or your orchard.'**
+  String get assistantGeneralGreeting;
+
+  /// No description provided for @chatInputHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Type your question…'**
+  String get chatInputHint;
+
+  /// No description provided for @send.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get send;
+
+  /// No description provided for @assistantThinking.
+  ///
+  /// In en, this message translates to:
+  /// **'Thinking…'**
+  String get assistantThinking;
+
+  /// No description provided for @assistantPlaceholderReply.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'m still learning. For now I can explain detection results and general care.'**
+  String get assistantPlaceholderReply;
 }
 
 class _AppLocalizationsDelegate
