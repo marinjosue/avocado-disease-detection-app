@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../core/providers/connectivity_provider.dart';
+import '../../../../core/theme/disease_colors.dart';
 import '../../../dashboard/presentation/pages/dashboard_page.dart';
 import '../../../calculator/presentation/pages/calculator_page.dart';
 import '../../../detection/presentation/pages/camera_page.dart';
@@ -30,6 +31,8 @@ class _MainPageState extends State<MainPage> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final connectivityProvider = Provider.of<ConnectivityProvider>(context);
+    final colorScheme = Theme.of(context).colorScheme;
+    final diseaseColors = Theme.of(context).extension<DiseaseColors>();
 
     // Valores por defecto si las localizaciones no están disponibles
     final dashboardLabel = l10n?.dashboard ?? 'Dashboard';
@@ -39,11 +42,15 @@ class _MainPageState extends State<MainPage> {
     final settingsLabel = l10n?.settings ?? 'Settings';
     final offlineModeText = l10n?.offlineMode ?? 'Offline mode - Using local model';
 
+    // Warning color for offline banner: use rona (amber) from DiseaseColors extension,
+    // falling back to colorScheme.secondary.
+    final warningColor = diseaseColors?.rona ?? colorScheme.secondary;
+
     return Scaffold(
       body: Stack(
         children: [
           _pages[_currentIndex],
-          
+
           // Offline Banner
           if (!connectivityProvider.isOnline)
             Positioned(
@@ -53,16 +60,16 @@ class _MainPageState extends State<MainPage> {
               child: SafeArea(
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  color: Colors.orange[700],
+                  color: warningColor,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.cloud_off, color: Colors.white, size: 16),
+                      Icon(Icons.cloud_off, color: colorScheme.onPrimary, size: 16),
                       const SizedBox(width: 8),
                       Text(
                         offlineModeText,
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: colorScheme.onPrimary,
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
                         ),
@@ -78,7 +85,7 @@ class _MainPageState extends State<MainPage> {
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha:0.1),
+              color: Colors.black.withValues(alpha: 0.1),
               blurRadius: 10,
               offset: const Offset(0, -2),
             ),
@@ -87,13 +94,6 @@ class _MainPageState extends State<MainPage> {
         child: BottomNavigationBar(
           currentIndex: _currentIndex,
           onTap: (index) => setState(() => _currentIndex = index),
-          type: BottomNavigationBarType.fixed,
-          selectedItemColor: const Color(0xFF2E7D32),
-          unselectedItemColor: Colors.grey,
-          selectedFontSize: 12,
-          unselectedFontSize: 12,
-          backgroundColor: Colors.white,
-          elevation: 0,
           items: [
             BottomNavigationBarItem(
               icon: const Icon(Icons.dashboard),
@@ -109,19 +109,19 @@ class _MainPageState extends State<MainPage> {
               icon: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF2E7D32), Color(0xFF66BB6A)],
+                  gradient: LinearGradient(
+                    colors: [colorScheme.primary, colorScheme.secondary],
                   ),
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF2E7D32).withValues(alpha:0.3),
+                      color: colorScheme.primary.withValues(alpha: 0.3),
                       blurRadius: 8,
                       spreadRadius: 2,
                     ),
                   ],
                 ),
-                child: const Icon(Icons.camera_alt, color: Colors.white, size: 24),
+                child: Icon(Icons.camera_alt, color: colorScheme.onPrimary, size: 24),
               ),
               label: cameraLabel,
             ),
