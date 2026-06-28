@@ -9,6 +9,8 @@ import '../../../../core/widgets/confidence_bar.dart';
 import '../../../../core/widgets/detection_tile.dart';
 import '../../../../core/widgets/section_header.dart';
 import '../providers/detection_provider.dart';
+import '../../../assistant/domain/assistant_context.dart';
+import '../../../assistant/presentation/pages/chat_page.dart';
 
 class HistoryListPage extends StatelessWidget {
   const HistoryListPage({super.key});
@@ -159,6 +161,23 @@ class HistoryListPage extends StatelessWidget {
                     TextButton(
                       onPressed: () => Navigator.pop(context),
                       child: Text(l10n.close),
+                    ),
+                    TextButton.icon(
+                      icon: const Icon(Icons.smart_toy),
+                      label: Text(l10n.askAI),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => ChatPage(
+                              context: AssistantContext.fromDetection(
+                                detection,
+                                isSpanish: l10n.localeName == 'es',
+                              ),
+                            ),
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),

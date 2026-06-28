@@ -14,6 +14,8 @@ import '../../data/services/detection_service.dart';
 import '../providers/detection_provider.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
+import '../../../assistant/domain/assistant_context.dart';
+import '../../../assistant/presentation/pages/chat_page.dart';
 
 class CameraPage extends StatefulWidget {
   const CameraPage({super.key});
@@ -370,7 +372,26 @@ class _CameraPageState extends State<CameraPage> {
           const SizedBox(height: AppSpacing.xl),
 
           // Actions
-          // Fase 2: aquí irá el botón "Preguntar a la IA"
+          SizedBox(
+            width: double.infinity,
+            child: SecondaryButton(
+              icon: Icons.smart_toy,
+              label: l10n.askAI,
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => ChatPage(
+                      context: AssistantContext.fromDetection(
+                        result,
+                        isSpanish: l10n.localeName == 'es',
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
           SizedBox(
             width: double.infinity,
             child: PrimaryButton(
