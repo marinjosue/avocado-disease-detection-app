@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../l10n/app_localizations.dart';
-import '../../../../core/constants/colors.dart';
-import '../../../../core/models/detection_result.dart';
+import '../../../../core/theme/disease_colors.dart';
+import '../../../../core/widgets/stat_card.dart';
+import '../../../../core/widgets/section_header.dart';
+import '../../../../core/widgets/donut_chart.dart';
+import '../../../../core/widgets/detection_tile.dart';
+import '../../../../core/widgets/app_states.dart';
 import '../../../detection/presentation/providers/detection_provider.dart';
-import 'package:fl_chart/fl_chart.dart';
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
@@ -12,11 +15,10 @@ class DashboardPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.dashboard),
-        backgroundColor: AppColors.primary,
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -34,6 +36,23 @@ class DashboardPage extends StatelessWidget {
 
           final stats = provider.statistics;
 
+          if (stats.totalAnalyses == 0) {
+            return RefreshIndicator(
+              onRefresh: () => provider.loadDetections(),
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.7,
+                  child: EmptyState(
+                    icon: Icons.insights,
+                    title: l10n.emptyDashboardTitle,
+                    message: l10n.emptyDashboardMessage,
+                  ),
+                ),
+              ),
+            );
+          }
+
           return RefreshIndicator(
             onRefresh: () => provider.loadDetections(),
             child: SingleChildScrollView(
@@ -42,35 +61,14 @@ class DashboardPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Statistics Cards
-                  _buildStatisticsCards(context, stats, l10n),
-                  
+                  _buildStatCards(context, stats, l10n),
                   const SizedBox(height: 24),
-                  
-                  // Pie Chart
-                  Text(
-                    l10n.statistics,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  _buildPieChart(stats, l10n),
-                  
+                  SectionHeader(title: l10n.distribution),
+                  const SizedBox(height: 12),
+                  _buildDonutChart(context, stats, l10n),
                   const SizedBox(height: 24),
-                  
-                  // Recent Activity
-                  Text(
-                    l10n.recentActivity,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
+                  SectionHeader(title: l10n.recentActivity),
+                  const SizedBox(height: 12),
                   _buildRecentActivity(context, provider, l10n),
                 ],
               ),
@@ -81,26 +79,28 @@ class DashboardPage extends StatelessWidget {
     );
   }
 
-  Widget _buildStatisticsCards(BuildContext context, dynamic stats, AppLocalizations l10n) {
+  Widget _buildStatCards(BuildContext context, dynamic stats, AppLocalizations l10n) {
+    final cs = Theme.of(context).colorScheme;
+    final dc = Theme.of(context).extension<DiseaseColors>()!;
     return Column(
       children: [
         Row(
           children: [
             Expanded(
-              child: _buildStatCard(
-                l10n.totalAnalyses,
-                stats.totalAnalyses.toString(),
-                Icons.analytics,
-                AppColors.primary,
+              child: StatCard(
+                icon: Icons.analytics,
+                label: l10n.totalAnalyses,
+                value: stats.totalAnalyses.toString(),
+                accentColor: cs.primary,
               ),
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: _buildStatCard(
-                l10n.healthyFruits,
-                stats.healthyFruits.toString(),
-                Icons.check_circle,
-                AppColors.healthy,
+              child: StatCard(
+                icon: Icons.check_circle,
+                label: l10n.healthyFruits,
+                value: stats.healthyFruits.toString(),
+                accentColor: dc.healthy,
               ),
             ),
           ],
@@ -109,20 +109,20 @@ class DashboardPage extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: _buildStatCard(
-                l10n.manchaNegra,
-                stats.manchaNegraCount.toString(),
-                Icons.warning,
-                AppColors.manchaNegra,
+              child: StatCard(
+                icon: Icons.coronavirus,
+                label: l10n.manchaNegra,
+                value: stats.manchaNegraCount.toString(),
+                accentColor: dc.manchaNegra,
               ),
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: _buildStatCard(
-                l10n.rona,
-                stats.ronaCount.toString(),
-                Icons.error,
-                AppColors.rona,
+              child: StatCard(
+                icon: Icons.warning_amber_rounded,
+                label: l10n.rona,
+                value: stats.ronaCount.toString(),
+                accentColor: dc.rona,
               ),
             ),
           ],
@@ -131,98 +131,28 @@ class DashboardPage extends StatelessWidget {
     );
   }
 
-  Widget _buildStatCard(String title, String value, IconData icon, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha:0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, color: color, size: 32),
-          const SizedBox(height: 12),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 12,
-              color: AppColors.textSecondary,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPieChart(dynamic stats, AppLocalizations l10n) {
-    if (stats.totalAnalyses == 0) {
-      return Container(
-        height: 200,
-        alignment: Alignment.center,
-        child: Text(l10n.noDataToShow),
-      );
-    }
-
-    return SizedBox(
-      height: 200,
-      child: PieChart(
-        PieChartData(
-          sectionsSpace: 2,
-          centerSpaceRadius: 40,
-          sections: [
-            PieChartSectionData(
-              value: stats.healthyPercentage,
-              title: '${stats.healthyPercentage.toStringAsFixed(1)}%',
-              color: AppColors.healthy,
-              radius: 50,
-              titleStyle: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-            PieChartSectionData(
-              value: stats.manchaNegraPercentage,
-              title: '${stats.manchaNegraPercentage.toStringAsFixed(1)}%',
-              color: AppColors.manchaNegra,
-              radius: 50,
-              titleStyle: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-            PieChartSectionData(
-              value: stats.ronaPercentage,
-              title: '${stats.ronaPercentage.toStringAsFixed(1)}%',
-              color: AppColors.rona,
-              radius: 50,
-              titleStyle: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-          ],
+  Widget _buildDonutChart(BuildContext context, dynamic stats, AppLocalizations l10n) {
+    final dc = Theme.of(context).extension<DiseaseColors>()!;
+    return DonutChart(
+      centerValue: stats.totalAnalyses.toString(),
+      centerLabel: l10n.totalAnalyses,
+      sections: [
+        DonutSection(
+          value: stats.healthyPercentage,
+          label: l10n.healthy,
+          color: dc.healthy,
         ),
-      ),
+        DonutSection(
+          value: stats.manchaNegraPercentage,
+          label: l10n.manchaNegra,
+          color: dc.manchaNegra,
+        ),
+        DonutSection(
+          value: stats.ronaPercentage,
+          label: l10n.rona,
+          color: dc.rona,
+        ),
+      ],
     );
   }
 
@@ -230,16 +160,9 @@ class DashboardPage extends StatelessWidget {
     final recentDetections = provider.getRecentDetections(limit: 5);
 
     if (recentDetections.isEmpty) {
-      return Container(
-        padding: const EdgeInsets.all(32),
-        alignment: Alignment.center,
-        child: Text(
-          l10n.noHistoryFound,
-          style: const TextStyle(
-            color: AppColors.textSecondary,
-            fontSize: 16,
-          ),
-        ),
+      return EmptyState(
+        icon: Icons.history,
+        title: l10n.noHistoryFound,
       );
     }
 
@@ -248,98 +171,16 @@ class DashboardPage extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       itemCount: recentDetections.length,
       itemBuilder: (context, index) {
-        final detection = recentDetections[index];
-        return _buildDetectionCard(detection, l10n);
+        final d = recentDetections[index];
+        final diseaseName = l10n.localeName == 'es' ? d.getDiseaseNameES() : d.getDiseaseNameEN();
+        final timeLabel = _formatDateTime(d.timestamp, l10n);
+        return DetectionTile(
+          result: d,
+          diseaseName: diseaseName,
+          timeLabel: timeLabel,
+          onTap: null,
+        );
       },
-    );
-  }
-
-  Widget _buildDetectionCard(DetectionResult detection, AppLocalizations l10n) {
-    Color statusColor;
-    switch (detection.diseaseType) {
-      case 'healthy':
-        statusColor = AppColors.healthy;
-        break;
-      case 'mancha_negra':
-        statusColor = AppColors.manchaNegra;
-        break;
-      case 'rona':
-        statusColor = AppColors.rona;
-        break;
-      default:
-        statusColor = AppColors.grey;
-    }
-
-    // Obtener nombre de enfermedad según idioma
-    String diseaseName;
-    if (l10n.localeName == 'es') {
-      diseaseName = detection.getDiseaseNameES();
-    } else {
-      diseaseName = detection.getDiseaseNameEN();
-    }
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha:0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              color: statusColor.withValues(alpha:0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(
-              detection.isHealthy ? Icons.check_circle : Icons.warning,
-              color: statusColor,
-              size: 32,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  diseaseName,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '${l10n.confidence}: ${(detection.confidence * 100).toStringAsFixed(1)}%',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-                Text(
-                  _formatDateTime(detection.timestamp, l10n),
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textHint,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
     );
   }
 
