@@ -67,7 +67,7 @@ class ThemeModeSelector extends StatelessWidget {
       value: tileValue,
       title: Row(
         children: [
-          Icon(icon, size: 20, color: cs.onSurfaceVariant),
+          Icon(icon, color: cs.onSurfaceVariant),
           const SizedBox(width: 12),
           Text(label),
         ],

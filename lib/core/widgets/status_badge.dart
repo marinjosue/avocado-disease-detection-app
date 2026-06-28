@@ -10,7 +10,7 @@ class StatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final color = theme.extension<DiseaseColors>()!.forType(diseaseType);
+    final color = (theme.extension<DiseaseColors>() ?? DiseaseColors.light).forType(diseaseType);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 5),
       decoration: BoxDecoration(

@@ -24,7 +24,7 @@ class DetectionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final color = theme.extension<DiseaseColors>()!.forType(result.diseaseType);
+    final color = (theme.extension<DiseaseColors>() ?? DiseaseColors.light).forType(result.diseaseType);
     final file = File(result.imagePath);
     final hasImage = file.existsSync();
 
