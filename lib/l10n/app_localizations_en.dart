@@ -414,4 +414,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onbStart => 'Get started';
+
+  @override
+  String get navDashboard => 'Dashboard';
+
+  @override
+  String get navCalculator => 'Calculator';
+
+  @override
+  String get navSettings => 'Settings';
 }

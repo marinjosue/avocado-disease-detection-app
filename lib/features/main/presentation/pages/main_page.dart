@@ -18,6 +18,7 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   int _currentIndex = 0;
+  bool _offlineDismissed = false;
 
   final List<Widget> _pages = const [
     DashboardPage(),
@@ -35,46 +36,65 @@ class _MainPageState extends State<MainPage> {
     final diseaseColors = Theme.of(context).extension<DiseaseColors>();
 
     // Valores por defecto si las localizaciones no están disponibles
-    final dashboardLabel = l10n?.dashboard ?? 'Dashboard';
-    final calculatorLabel = l10n?.calculator ?? 'Calculator';
+    // Etiquetas cortas para la barra inferior (los títulos de cada pantalla
+    // siguen usando los nombres completos en sus AppBars).
+    final dashboardLabel = l10n?.navDashboard ?? 'Panel';
+    final calculatorLabel = l10n?.navCalculator ?? 'Calc.';
     final cameraLabel = l10n?.camera ?? 'Camera';
     final historyLabel = l10n?.history ?? 'History';
-    final settingsLabel = l10n?.settings ?? 'Settings';
+    final settingsLabel = l10n?.navSettings ?? 'Ajustes';
     final offlineModeText = l10n?.offlineMode ?? 'Offline mode - Using local model';
 
     // Warning color for offline banner: use rona (amber) from DiseaseColors extension,
     // falling back to colorScheme.secondary.
     final warningColor = diseaseColors?.rona ?? colorScheme.secondary;
 
+    // Si volvió la conexión, permitir que el banner reaparezca la próxima vez
+    // que se pierda (resetea el estado "cerrado" del usuario).
+    if (connectivityProvider.isOnline && _offlineDismissed) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) setState(() => _offlineDismissed = false);
+      });
+    }
+
     return Scaffold(
       body: Stack(
         children: [
           _pages[_currentIndex],
 
-          // Offline Banner
-          if (!connectivityProvider.isOnline)
+          // Offline Banner (con botón de cerrar)
+          if (!connectivityProvider.isOnline && !_offlineDismissed)
             Positioned(
               top: 0,
               left: 0,
               right: 0,
               child: SafeArea(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Material(
                   color: warningColor,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.cloud_off, color: colorScheme.onPrimary, size: 16),
-                      const SizedBox(width: 8),
-                      Text(
-                        offlineModeText,
-                        style: TextStyle(
-                          color: colorScheme.onPrimary,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 16, top: 4, bottom: 4),
+                    child: Row(
+                      children: [
+                        Icon(Icons.cloud_off, color: colorScheme.onPrimary, size: 16),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            offlineModeText,
+                            style: TextStyle(
+                              color: colorScheme.onPrimary,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
                         ),
-                      ),
-                    ],
+                        IconButton(
+                          icon: Icon(Icons.close, color: colorScheme.onPrimary, size: 18),
+                          tooltip: l10n?.close ?? 'Cerrar',
+                          visualDensity: VisualDensity.compact,
+                          onPressed: () => setState(() => _offlineDismissed = true),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

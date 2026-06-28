@@ -130,5 +130,8 @@
   "onbResultsBody": "Revisa el diagnóstico, las recomendaciones y tu historial.",
   "onbSkip": "Saltar",
   "onbNext": "Siguiente",
-  "onbStart": "Empezar"
+  "onbStart": "Empezar",
+  "navDashboard": "Panel",
+  "navCalculator": "Calc.",
+  "navSettings": "Ajustes"
 }
