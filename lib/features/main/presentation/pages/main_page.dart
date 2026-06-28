@@ -60,74 +60,65 @@ class _MainPageState extends State<MainPage> {
       });
     }
 
-    // Helper: bar item selected state.
-    // Bar items map to page indices [0, 1, 2, 4, 5]; camera (3) is the FAB.
-    Widget barItem({
-      required int pageIndex,
-      required IconData icon,
-      required String label,
-    }) {
-      final selected = _currentIndex == pageIndex;
-      final color = selected ? colorScheme.primary : colorScheme.onSurfaceVariant;
-      return Expanded(
-        child: InkWell(
-          onTap: () => setState(() => _currentIndex = pageIndex),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 6),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(icon, color: color, size: selected ? 26 : 22),
-                const SizedBox(height: 2),
-                Text(
-                  label,
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: color,
-                        fontWeight:
-                            selected ? FontWeight.w600 : FontWeight.normal,
-                      ),
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 1,
-                ),
-              ],
-            ),
+    // Bottom bar: 6 evenly-sized destinations with the Camera highlighted
+    // (icon inside a green circle). Index map: 0 Panel · 1 Calc · 2 Assistant ·
+    // 3 Camera · 4 History · 5 Settings.
+    final bottomBar = Container(
+      decoration: BoxDecoration(
+        boxShadow: [
+          BoxShadow(
+            color: colorScheme.shadow.withValues(alpha: 0.1),
+            blurRadius: 10,
+            offset: const Offset(0, -2),
           ),
-        ),
-      );
-    }
-
-    final bottomBar = BottomAppBar(
-      shape: const CircularNotchedRectangle(),
-      notchMargin: 6,
-      child: Row(
-        children: [
-          // Left side: Dashboard, Calculator, Assistant
-          barItem(
-            pageIndex: 0,
-            icon: Icons.dashboard,
+        ],
+      ),
+      child: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: (i) => setState(() => _currentIndex = i),
+        type: BottomNavigationBarType.fixed,
+        selectedFontSize: 11,
+        unselectedFontSize: 11,
+        items: [
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.dashboard),
             label: dashboardLabel,
           ),
-          barItem(
-            pageIndex: 1,
-            icon: Icons.calculate,
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.calculate),
             label: calculatorLabel,
           ),
-          barItem(
-            pageIndex: 2,
-            icon: Icons.smart_toy,
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.smart_toy),
             label: assistantLabel,
           ),
-          // Gap for the FAB notch
-          const SizedBox(width: 56),
-          // Right side: History, Settings
-          barItem(
-            pageIndex: 4,
-            icon: Icons.history,
+          BottomNavigationBarItem(
+            // Highlighted Camera (the primary action).
+            icon: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [colorScheme.primary, colorScheme.secondary],
+                ),
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: colorScheme.primary.withValues(alpha: 0.3),
+                    blurRadius: 6,
+                    spreadRadius: 1,
+                  ),
+                ],
+              ),
+              child: Icon(Icons.camera_alt, color: colorScheme.onPrimary, size: 22),
+            ),
+            label: cameraLabel,
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.history),
             label: historyLabel,
           ),
-          barItem(
-            pageIndex: 5,
-            icon: Icons.settings,
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.settings),
             label: settingsLabel,
           ),
         ],
@@ -182,19 +173,6 @@ class _MainPageState extends State<MainPage> {
         ],
       ),
       bottomNavigationBar: bottomBar,
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => setState(() => _currentIndex = 3),
-        tooltip: cameraLabel,
-        backgroundColor: _currentIndex == 3
-            ? colorScheme.primary
-            : colorScheme.primaryContainer,
-        foregroundColor: _currentIndex == 3
-            ? colorScheme.onPrimary
-            : colorScheme.onPrimaryContainer,
-        elevation: _currentIndex == 3 ? 6 : 4,
-        child: const Icon(Icons.camera_alt, size: 28),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 }
