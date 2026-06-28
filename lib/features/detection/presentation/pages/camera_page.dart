@@ -3,8 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import '../../../../l10n/app_localizations.dart';
-import '../../../../core/constants/colors.dart';
 import '../../../../core/models/detection_result.dart';
+import '../../../../core/theme/app_tokens.dart';
+import '../../../../core/theme/disease_colors.dart';
+import '../../../../core/widgets/app_buttons.dart';
+import '../../../../core/widgets/confidence_bar.dart';
+import '../../../../core/widgets/section_header.dart';
+import '../../../../core/widgets/status_badge.dart';
 import '../../data/services/detection_service.dart';
 import '../providers/detection_provider.dart';
 import 'package:path_provider/path_provider.dart';
@@ -73,7 +78,7 @@ class _CameraPageState extends State<CameraPage> {
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       final fileName = 'detection_$timestamp.jpg';
       final savedImagePath = path.join(directory.path, fileName);
-      
+
       await _selectedImage!.copy(savedImagePath);
 
       // Detect disease
@@ -101,38 +106,59 @@ class _CameraPageState extends State<CameraPage> {
 
   void _showResultDialog(DetectionResult result) {
     final l10n = AppLocalizations.of(context)!;
-    
+    final theme = Theme.of(context);
+    final diseaseColors = theme.extension<DiseaseColors>()!;
+    final diseaseColor = diseaseColors.forType(result.diseaseType);
+    final diseaseName = l10n.localeName == 'es'
+        ? result.getDiseaseNameES()
+        : result.getDiseaseNameEN();
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          result.getDiseaseNameES(),
-          style: const TextStyle(fontWeight: FontWeight.bold),
+      builder: (ctx) => AlertDialog(
+        backgroundColor: theme.colorScheme.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+        ),
+        title: Row(
+          children: [
+            StatusBadge(diseaseType: result.diseaseType, label: diseaseName),
+          ],
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '${l10n.confidence}: ${(result.confidence * 100).toStringAsFixed(1)}%',
-              style: const TextStyle(fontSize: 16),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              l10n.recommendations,
-              style: const TextStyle(
+              diseaseName,
+              style: theme.textTheme.titleLarge?.copyWith(
+                color: diseaseColor,
                 fontWeight: FontWeight.bold,
-                fontSize: 16,
               ),
             ),
-            const SizedBox(height: 8),
-            Text(result.getRecommendationES()),
+            const SizedBox(height: AppSpacing.md),
+            ConfidenceBar(value: result.confidence, label: l10n.confidence),
+            const SizedBox(height: AppSpacing.lg),
+            SectionHeader(title: l10n.recommendations),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              l10n.localeName == 'es'
+                  ? result.getRecommendationES()
+                  : result.getRecommendationEN(),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurface,
+                height: 1.5,
+              ),
+            ),
           ],
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(
+              'OK',
+              style: TextStyle(color: theme.colorScheme.primary),
+            ),
           ),
         ],
       ),
@@ -141,15 +167,26 @@ class _CameraPageState extends State<CameraPage> {
 
   void _showErrorDialog(String message) {
     final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.error),
-        content: Text(message),
+      builder: (ctx) => AlertDialog(
+        backgroundColor: theme.colorScheme.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+        ),
+        title: Text(
+          l10n.error,
+          style: theme.textTheme.titleMedium,
+        ),
+        content: Text(message, style: theme.textTheme.bodyMedium),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(
+              'OK',
+              style: TextStyle(color: theme.colorScheme.primary),
+            ),
           ),
         ],
       ),
@@ -166,11 +203,12 @@ class _CameraPageState extends State<CameraPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.camera),
-        backgroundColor: AppColors.primary,
         actions: [
           if (_selectedImage != null)
             IconButton(
@@ -180,21 +218,24 @@ class _CameraPageState extends State<CameraPage> {
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           children: [
-            // Image Preview
+            // ── Image Preview ──────────────────────────────────────────
             Container(
               width: double.infinity,
               height: 400,
               decoration: BoxDecoration(
-                color: AppColors.greyLight,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppColors.grey, width: 2),
+                color: cs.surface,
+                borderRadius: BorderRadius.circular(AppRadius.lg),
+                border: Border.all(
+                  color: theme.dividerColor,
+                  width: 2,
+                ),
               ),
               child: _selectedImage != null
                   ? ClipRRect(
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(AppRadius.lg - 2),
                       child: Image.file(
                         _selectedImage!,
                         fit: BoxFit.cover,
@@ -206,132 +247,85 @@ class _CameraPageState extends State<CameraPage> {
                         Icon(
                           Icons.image_outlined,
                           size: 80,
-                          color: AppColors.grey,
+                          color: cs.onSurface.withValues(alpha: 0.3),
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: AppSpacing.lg),
                         Text(
                           l10n.selectImage,
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: AppColors.textSecondary,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: cs.onSurface.withValues(alpha: 0.5),
                           ),
                         ),
                       ],
                     ),
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpacing.xxl),
 
-            // Buttons
+            // ── Action Buttons ─────────────────────────────────────────
             if (_selectedImage == null) ...[
-              _buildActionButton(
-                icon: Icons.camera_alt,
-                label: l10n.takePhoto,
-                color: AppColors.primary,
-                onPressed: () => _pickImage(ImageSource.camera),
+              SizedBox(
+                width: double.infinity,
+                child: PrimaryButton(
+                  icon: Icons.camera_alt,
+                  label: l10n.takePhoto,
+                  onPressed: () => _pickImage(ImageSource.camera),
+                ),
               ),
-              const SizedBox(height: 12),
-              _buildActionButton(
-                icon: Icons.photo_library,
-                label: l10n.chooseFromGallery,
-                color: AppColors.accent,
-                onPressed: () => _pickImage(ImageSource.gallery),
+              const SizedBox(height: AppSpacing.md),
+              SizedBox(
+                width: double.infinity,
+                child: SecondaryButton(
+                  icon: Icons.photo_library,
+                  label: l10n.chooseFromGallery,
+                  onPressed: () => _pickImage(ImageSource.gallery),
+                ),
               ),
             ] else ...[
-              _buildActionButton(
-                icon: Icons.analytics,
-                label: _isProcessing ? l10n.analyzing : l10n.analyzeImage,
-                color: AppColors.primary,
-                onPressed: _isProcessing ? null : _analyzeImage,
-                isLoading: _isProcessing,
+              SizedBox(
+                width: double.infinity,
+                child: PrimaryButton(
+                  icon: Icons.analytics,
+                  label: _isProcessing ? l10n.analyzing : l10n.analyzeImage,
+                  isLoading: _isProcessing,
+                  onPressed: _isProcessing ? null : _analyzeImage,
+                ),
               ),
             ],
 
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpacing.xxl),
 
-            // Result Preview
-            if (_detectionResult != null) ...[
-              _buildResultCard(_detectionResult!, l10n),
-            ],
+            // ── Result Card ────────────────────────────────────────────
+            if (_detectionResult != null)
+              _buildResultCard(_detectionResult!, l10n, theme),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildActionButton({
-    required IconData icon,
-    required String label,
-    required Color color,
-    VoidCallback? onPressed,
-    bool isLoading = false,
-  }) {
-    return SizedBox(
-      width: double.infinity,
-      height: 56,
-      child: ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: color,
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          elevation: 2,
-        ),
-        child: isLoading
-            ? const SizedBox(
-                height: 24,
-                width: 24,
-                child: CircularProgressIndicator(
-                  color: Colors.white,
-                  strokeWidth: 2,
-                ),
-              )
-            : Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(icon, size: 24),
-                  const SizedBox(width: 12),
-                  Text(
-                    label,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-      ),
-    );
-  }
-
-  Widget _buildResultCard(DetectionResult result, AppLocalizations l10n) {
-    Color statusColor;
-    switch (result.diseaseType) {
-      case 'healthy':
-        statusColor = AppColors.healthy;
-        break;
-      case 'mancha_negra':
-        statusColor = AppColors.manchaNegra;
-        break;
-      case 'rona':
-        statusColor = AppColors.rona;
-        break;
-      default:
-        statusColor = AppColors.grey;
-    }
+  Widget _buildResultCard(
+    DetectionResult result,
+    AppLocalizations l10n,
+    ThemeData theme,
+  ) {
+    final cs = theme.colorScheme;
+    final diseaseColors = theme.extension<DiseaseColors>()!;
+    final diseaseColor = diseaseColors.forType(result.diseaseType);
+    final diseaseName = l10n.localeName == 'es'
+        ? result.getDiseaseNameES()
+        : result.getDiseaseNameEN();
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(AppSpacing.xl),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        color: cs.surface,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha:0.1),
-            blurRadius: 10,
+            color: cs.shadow.withValues(alpha: 0.08),
+            blurRadius: 12,
             offset: const Offset(0, 4),
           ),
         ],
@@ -339,63 +333,63 @@ class _CameraPageState extends State<CameraPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: statusColor.withValues(alpha:0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  result.isHealthy ? Icons.check_circle : Icons.warning,
-                  color: statusColor,
-                  size: 32,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      result.getDiseaseNameES(),
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: statusColor,
-                      ),
-                    ),
-                    Text(
-                      '${l10n.confidence}: ${(result.confidence * 100).toStringAsFixed(1)}%',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          const Divider(),
-          const SizedBox(height: 16),
+          // Result banner: badge + disease name
+          StatusBadge(diseaseType: result.diseaseType, label: diseaseName),
+          const SizedBox(height: AppSpacing.md),
           Text(
-            l10n.recommendations,
-            style: const TextStyle(
-              fontSize: 16,
+            diseaseName,
+            style: theme.textTheme.headlineSmall?.copyWith(
+              color: diseaseColor,
               fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.lg),
+
+          // Confidence bar
+          ConfidenceBar(value: result.confidence, label: l10n.confidence),
+          const SizedBox(height: AppSpacing.lg),
+
+          Divider(color: theme.dividerColor),
+          const SizedBox(height: AppSpacing.lg),
+
+          // Recommendations
+          SectionHeader(title: l10n.recommendations),
+          const SizedBox(height: AppSpacing.sm),
           Text(
-            result.getRecommendationES(),
-            style: const TextStyle(
-              fontSize: 14,
-              color: AppColors.textSecondary,
+            l10n.localeName == 'es'
+                ? result.getRecommendationES()
+                : result.getRecommendationEN(),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: cs.onSurface.withValues(alpha: 0.75),
               height: 1.5,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xl),
+
+          // Actions
+          // Fase 2: aquí irá el botón "Preguntar a la IA"
+          SizedBox(
+            width: double.infinity,
+            child: PrimaryButton(
+              icon: Icons.check,
+              label: l10n.save,
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(l10n.save),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          SizedBox(
+            width: double.infinity,
+            child: SecondaryButton(
+              icon: Icons.refresh,
+              label: l10n.newDetection,
+              onPressed: _reset,
             ),
           ),
         ],
