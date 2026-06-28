@@ -154,9 +154,12 @@ class _CameraPageState extends State<CameraPage> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(ctx),
+            onPressed: () {
+              Navigator.pop(ctx);
+              _reset();
+            },
             child: Text(
-              'OK',
+              l10n.newDetection,
               style: TextStyle(color: theme.colorScheme.primary),
             ),
           ),
@@ -371,22 +374,6 @@ class _CameraPageState extends State<CameraPage> {
           SizedBox(
             width: double.infinity,
             child: PrimaryButton(
-              icon: Icons.check,
-              label: l10n.save,
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(l10n.save),
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
-              },
-            ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          SizedBox(
-            width: double.infinity,
-            child: SecondaryButton(
               icon: Icons.refresh,
               label: l10n.newDetection,
               onPressed: _reset,
