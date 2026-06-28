@@ -11,6 +11,8 @@ import 'core/services/onboarding_service.dart';
 import 'features/main/presentation/pages/main_page.dart';
 import 'features/onboarding/presentation/pages/onboarding_page.dart';
 import 'features/detection/presentation/providers/detection_provider.dart';
+import 'features/assistant/data/stub_assistant_service.dart';
+import 'features/assistant/presentation/providers/assistant_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -34,6 +36,9 @@ class AvoScanApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ConnectivityProvider()),
         ChangeNotifierProvider(create: (_) => DetectionProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(
+          create: (_) => AssistantProvider(StubAssistantService()),
+        ),
       ],
       child: Consumer2<LocaleProvider, ThemeProvider>(
         builder: (context, localeProvider, themeProvider, child) {
