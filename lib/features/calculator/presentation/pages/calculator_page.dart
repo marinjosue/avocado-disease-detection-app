@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../l10n/app_localizations.dart';
-import '../../../../core/constants/colors.dart';
+import '../../../../core/theme/app_tokens.dart';
+import '../../../../core/theme/disease_colors.dart';
+import '../../../../core/widgets/app_buttons.dart';
+import '../../../../core/widgets/info_hint.dart';
+import '../../../../core/widgets/section_header.dart';
 import '../../../detection/presentation/providers/detection_provider.dart';
 
 class CalculatorPage extends StatefulWidget {
@@ -92,150 +96,133 @@ class _CalculatorPageState extends State<CalculatorPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final dc = theme.extension<DiseaseColors>()!;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.calculator),
-        backgroundColor: AppColors.primary,
         actions: [
           IconButton(
             icon: const Icon(Icons.history),
-            tooltip: 'Cargar desde historial',
+            tooltip: l10n.loadFromHistory,
             onPressed: _loadFromHistory,
           ),
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               l10n.healthCalculator,
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-              ),
+              style: theme.textTheme.headlineSmall,
             ),
-            const SizedBox(height: 8),
-            const Text(
+            const SizedBox(height: AppSpacing.sm),
+            Text(
               'Ingrese los datos manualmente o cárguelos desde su historial de detecciones',
-              style: TextStyle(
-                fontSize: 14,
-                color: AppColors.textSecondary,
-              ),
+              style: theme.textTheme.bodyMedium,
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpacing.xxl),
 
             // Input Fields
             _buildTextField(
               controller: _totalFruitsController,
               label: l10n.totalFruits,
               icon: Icons.numbers,
+              iconColor: theme.colorScheme.primary,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.lg),
             _buildTextField(
               controller: _healthyController,
               label: l10n.healthyFruits,
               icon: Icons.check_circle,
-              color: AppColors.healthy,
+              iconColor: dc.healthy,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.lg),
             _buildTextField(
               controller: _manchaNegraController,
               label: l10n.manchaNegra,
               icon: Icons.warning,
-              color: AppColors.manchaNegra,
+              iconColor: dc.manchaNegra,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.lg),
             _buildTextField(
               controller: _ronaController,
               label: l10n.rona,
               icon: Icons.error,
-              color: AppColors.rona,
+              iconColor: dc.rona,
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpacing.xxl),
 
             // Action Buttons
             Row(
               children: [
                 Expanded(
-                  child: ElevatedButton(
+                  child: PrimaryButton(
+                    label: l10n.calculateHealthScore,
                     onPressed: _calculate,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: Text(l10n.calculateHealthScore),
                   ),
                 ),
-                const SizedBox(width: 12),
-                ElevatedButton(
+                const SizedBox(width: AppSpacing.md),
+                IconButton.outlined(
+                  icon: const Icon(Icons.refresh),
+                  tooltip: 'Reset',
                   onPressed: _reset,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.greyLight,
-                    foregroundColor: AppColors.textPrimary,
-                    padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                  style: IconButton.styleFrom(
+                    padding: const EdgeInsets.all(AppSpacing.lg),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(AppRadius.md),
                     ),
                   ),
-                  child: const Icon(Icons.refresh),
                 ),
               ],
             ),
 
-            const SizedBox(height: 32),
+            const SizedBox(height: AppSpacing.xxxl),
 
             // Results
             if (_healthyPercentage > 0 || _manchaNegraPercentage > 0 || _ronaPercentage > 0) ...[
               const Divider(),
-              const SizedBox(height: 24),
-              Text(
-                'Resultados',
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
+              const SizedBox(height: AppSpacing.xxl),
+              SectionHeader(title: l10n.results),
+              const SizedBox(height: AppSpacing.lg),
+
+              _buildResultCard(
+                label: l10n.healthyPercentage,
+                percentage: _healthyPercentage,
+                color: dc.healthy,
+                icon: Icons.check_circle,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              _buildResultCard(
+                label: l10n.manchaNegra,
+                percentage: _manchaNegraPercentage,
+                color: dc.manchaNegra,
+                icon: Icons.warning,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              _buildResultCard(
+                label: l10n.rona,
+                percentage: _ronaPercentage,
+                color: dc.rona,
+                icon: Icons.error,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              _buildResultCard(
+                label: l10n.diseaseIncidence,
+                percentage: _diseaseIncidence,
+                color: theme.colorScheme.secondary,
+                icon: Icons.analytics,
+                trailing: InfoHint(
+                  term: l10n.diseaseIncidence,
+                  explanation: l10n.confidenceHint,
                 ),
               ),
-              const SizedBox(height: 16),
-              
-              _buildResultCard(
-                l10n.healthyPercentage,
-                _healthyPercentage,
-                AppColors.healthy,
-                Icons.check_circle,
-              ),
-              const SizedBox(height: 12),
-              _buildResultCard(
-                'Mancha Negra',
-                _manchaNegraPercentage,
-                AppColors.manchaNegra,
-                Icons.warning,
-              ),
-              const SizedBox(height: 12),
-              _buildResultCard(
-                'Roña',
-                _ronaPercentage,
-                AppColors.rona,
-                Icons.error,
-              ),
-              const SizedBox(height: 12),
-              _buildResultCard(
-                l10n.diseaseIncidence,
-                _diseaseIncidence,
-                AppColors.warning,
-                Icons.analytics,
-              ),
 
-              const SizedBox(height: 24),
-              _buildRecommendations(),
+              const SizedBox(height: AppSpacing.xxl),
+              _buildRecommendations(l10n, theme),
             ],
           ],
         ),
@@ -247,35 +234,35 @@ class _CalculatorPageState extends State<CalculatorPage> {
     required TextEditingController controller,
     required String label,
     required IconData icon,
-    Color color = AppColors.primary,
+    required Color iconColor,
   }) {
     return TextField(
       controller: controller,
       keyboardType: TextInputType.number,
       decoration: InputDecoration(
         labelText: label,
-        prefixIcon: Icon(icon, color: color),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: color, width: 2),
-        ),
+        prefixIcon: Icon(icon, color: iconColor),
       ),
     );
   }
 
-  Widget _buildResultCard(String label, double percentage, Color color, IconData icon) {
+  Widget _buildResultCard({
+    required String label,
+    required double percentage,
+    required Color color,
+    required IconData icon,
+    Widget? trailing,
+  }) {
+    final theme = Theme.of(context);
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha:0.3), width: 2),
+        color: theme.cardTheme.color,
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        border: Border.all(color: color.withValues(alpha: 0.3), width: 2),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha:0.05),
+            color: theme.shadowColor.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -284,43 +271,34 @@ class _CalculatorPageState extends State<CalculatorPage> {
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(AppSpacing.sm),
             decoration: BoxDecoration(
-              color: color.withValues(alpha:0.1),
+              color: color.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, color: color, size: 24),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: AppSpacing.lg),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  label,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-                const SizedBox(height: 4),
+                Text(label, style: theme.textTheme.bodySmall),
+                const SizedBox(height: AppSpacing.xs),
                 Text(
                   '${percentage.toStringAsFixed(1)}%',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: color,
-                  ),
+                  style: theme.textTheme.headlineSmall?.copyWith(color: color),
                 ),
               ],
             ),
           ),
+          if (trailing != null) trailing,
         ],
       ),
     );
   }
 
-  Widget _buildRecommendations() {
+  Widget _buildRecommendations(AppLocalizations l10n, ThemeData theme) {
     String recommendation;
     Color color;
     IconData icon;
@@ -330,7 +308,7 @@ class _CalculatorPageState extends State<CalculatorPage> {
 ✓ Continuar con las prácticas actuales de manejo
 ✓ Mantener monitoreo preventivo regular
 ✓ Documentar las prácticas exitosas''';
-      color = AppColors.healthy;
+      color = theme.extension<DiseaseColors>()!.healthy;
       icon = Icons.check_circle;
     } else if (_diseaseIncidence < 25) {
       recommendation = '''⚠ Nivel de alerta temprana
@@ -338,7 +316,7 @@ class _CalculatorPageState extends State<CalculatorPage> {
 ⚠ Considerar aplicación preventiva de fungicidas
 ⚠ Revisar prácticas de manejo cultural
 ⚠ Mejorar ventilación y drenaje''';
-      color = AppColors.warning;
+      color = theme.extension<DiseaseColors>()!.rona;
       icon = Icons.warning;
     } else {
       recommendation = '''✗ Nivel crítico - Acción inmediata requerida
@@ -347,15 +325,15 @@ class _CalculatorPageState extends State<CalculatorPage> {
 ✗ Mejorar condiciones ambientales
 ✗ Consultar con especialista agronómico
 ✗ Implementar plan de manejo integrado''';
-      color = AppColors.error;
+      color = theme.colorScheme.error;
       icon = Icons.error;
     }
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: color.withValues(alpha:0.1),
-        borderRadius: BorderRadius.circular(12),
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(AppRadius.md),
         border: Border.all(color: color, width: 2),
       ),
       child: Column(
@@ -364,25 +342,17 @@ class _CalculatorPageState extends State<CalculatorPage> {
           Row(
             children: [
               Icon(icon, color: color, size: 24),
-              const SizedBox(width: 12),
-              const Text(
-                'Recomendaciones',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                ),
+              const SizedBox(width: AppSpacing.md),
+              Text(
+                l10n.recommendations,
+                style: theme.textTheme.titleMedium,
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
           Text(
             recommendation,
-            style: const TextStyle(
-              fontSize: 14,
-              color: AppColors.textPrimary,
-              height: 1.6,
-            ),
+            style: theme.textTheme.bodyMedium?.copyWith(height: 1.6),
           ),
         ],
       ),
