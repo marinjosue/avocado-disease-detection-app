@@ -56,9 +56,9 @@ class SettingsPage extends StatelessWidget {
           Card(
             margin: const EdgeInsets.only(bottom: AppSpacing.sm),
             child: ListTile(
-              leading: Icon(Icons.smart_toy, color: Theme.of(context).colorScheme.primary),
-              title: Text(l10n.aiModelTile, style: Theme.of(context).textTheme.titleMedium),
-              trailing: Icon(Icons.chevron_right, color: Theme.of(context).colorScheme.onSurfaceVariant),
+              leading: Icon(Icons.smart_toy, color: cs.primary),
+              title: Text(l10n.aiModelTile, style: theme.textTheme.titleMedium),
+              trailing: Icon(Icons.chevron_right, color: cs.onSurfaceVariant),
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const ModelSetupPage()),
               ),

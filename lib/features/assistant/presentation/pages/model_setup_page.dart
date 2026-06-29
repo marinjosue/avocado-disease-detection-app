@@ -140,7 +140,6 @@ class _ModelSetupPageState extends State<ModelSetupPage> {
                           children: [
                             Icon(
                               Icons.wifi,
-                              size: 18,
                               color: cs.primary,
                             ),
                             const SizedBox(width: AppSpacing.xs),
