@@ -155,5 +155,15 @@
   "modelReady": "Modelo listo",
   "modelNotReady": "Modelo no instalado",
   "downloadError": "No se pudo descargar el modelo",
-  "aiModelTile": "Modelo del asistente (IA)"
+  "aiModelTile": "Modelo del asistente (IA)",
+  "conversations": "Conversaciones",
+  "newConversation": "Nueva conversación",
+  "noConversations": "Aún no hay conversaciones",
+  "noConversationsMsg": "Inicia un chat con el asistente.",
+  "deleteConversation": "Eliminar conversación",
+  "deleteConversationMsg": "Esta conversación se eliminará permanentemente.",
+  "deleteAllConversations": "Eliminar todas",
+  "deleteAllConversationsMsg": "Todas las conversaciones se eliminarán permanentemente.",
+  "conversationDeleted": "Conversación eliminada",
+  "untitledConversation": "Conversación"
 }

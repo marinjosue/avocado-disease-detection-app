@@ -1033,6 +1033,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Assistant model (AI)'**
   String get aiModelTile;
+
+  /// Title for the conversations list screen
+  ///
+  /// In en, this message translates to:
+  /// **'Conversations'**
+  String get conversations;
+
+  /// FAB label to create a new conversation
+  ///
+  /// In en, this message translates to:
+  /// **'New conversation'**
+  String get newConversation;
+
+  /// Empty state title when no conversations exist
+  ///
+  /// In en, this message translates to:
+  /// **'No conversations yet'**
+  String get noConversations;
+
+  /// Empty state message when no conversations exist
+  ///
+  /// In en, this message translates to:
+  /// **'Start a chat with the assistant.'**
+  String get noConversationsMsg;
+
+  /// Title of the delete-single-conversation confirmation dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Delete conversation'**
+  String get deleteConversation;
+
+  /// Body of the delete-single-conversation confirmation dialog
+  ///
+  /// In en, this message translates to:
+  /// **'This conversation will be permanently removed.'**
+  String get deleteConversationMsg;
+
+  /// Title/action for deleting all conversations
+  ///
+  /// In en, this message translates to:
+  /// **'Delete all'**
+  String get deleteAllConversations;
+
+  /// Body of the delete-all-conversations confirmation dialog
+  ///
+  /// In en, this message translates to:
+  /// **'All conversations will be permanently removed.'**
+  String get deleteAllConversationsMsg;
+
+  /// SnackBar shown after a conversation is deleted
+  ///
+  /// In en, this message translates to:
+  /// **'Conversation deleted'**
+  String get conversationDeleted;
+
+  /// Fallback title when a conversation has no title
+  ///
+  /// In en, this message translates to:
+  /// **'Conversation'**
+  String get untitledConversation;
 }
 
 class _AppLocalizationsDelegate

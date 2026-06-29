@@ -308,5 +308,45 @@
   "modelReady": "Model ready",
   "modelNotReady": "Model not installed",
   "downloadError": "Could not download the model",
-  "aiModelTile": "Assistant model (AI)"
+  "aiModelTile": "Assistant model (AI)",
+  "conversations": "Conversations",
+  "@conversations": {
+    "description": "Title for the conversations list screen"
+  },
+  "newConversation": "New conversation",
+  "@newConversation": {
+    "description": "FAB label to create a new conversation"
+  },
+  "noConversations": "No conversations yet",
+  "@noConversations": {
+    "description": "Empty state title when no conversations exist"
+  },
+  "noConversationsMsg": "Start a chat with the assistant.",
+  "@noConversationsMsg": {
+    "description": "Empty state message when no conversations exist"
+  },
+  "deleteConversation": "Delete conversation",
+  "@deleteConversation": {
+    "description": "Title of the delete-single-conversation confirmation dialog"
+  },
+  "deleteConversationMsg": "This conversation will be permanently removed.",
+  "@deleteConversationMsg": {
+    "description": "Body of the delete-single-conversation confirmation dialog"
+  },
+  "deleteAllConversations": "Delete all",
+  "@deleteAllConversations": {
+    "description": "Title/action for deleting all conversations"
+  },
+  "deleteAllConversationsMsg": "All conversations will be permanently removed.",
+  "@deleteAllConversationsMsg": {
+    "description": "Body of the delete-all-conversations confirmation dialog"
+  },
+  "conversationDeleted": "Conversation deleted",
+  "@conversationDeleted": {
+    "description": "SnackBar shown after a conversation is deleted"
+  },
+  "untitledConversation": "Conversation",
+  "@untitledConversation": {
+    "description": "Fallback title when a conversation has no title"
+  }
 }

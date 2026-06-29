@@ -495,4 +495,36 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get aiModelTile => 'Modelo del asistente (IA)';
+
+  @override
+  String get conversations => 'Conversaciones';
+
+  @override
+  String get newConversation => 'Nueva conversación';
+
+  @override
+  String get noConversations => 'Aún no hay conversaciones';
+
+  @override
+  String get noConversationsMsg => 'Inicia un chat con el asistente.';
+
+  @override
+  String get deleteConversation => 'Eliminar conversación';
+
+  @override
+  String get deleteConversationMsg =>
+      'Esta conversación se eliminará permanentemente.';
+
+  @override
+  String get deleteAllConversations => 'Eliminar todas';
+
+  @override
+  String get deleteAllConversationsMsg =>
+      'Todas las conversaciones se eliminarán permanentemente.';
+
+  @override
+  String get conversationDeleted => 'Conversación eliminada';
+
+  @override
+  String get untitledConversation => 'Conversación';
 }

@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../core/providers/connectivity_provider.dart';
 import '../../../../core/theme/disease_colors.dart';
-import '../../../assistant/presentation/pages/chat_page.dart';
+import '../../../assistant/presentation/pages/conversations_list_page.dart';
 import '../../../dashboard/presentation/pages/dashboard_page.dart';
 import '../../../calculator/presentation/pages/calculator_page.dart';
 import '../../../detection/presentation/pages/camera_page.dart';
@@ -43,11 +43,11 @@ class _MainPageState extends State<MainPage> {
     // Warning color for offline banner.
     final warningColor = diseaseColors?.rona ?? colorScheme.secondary;
 
-    // Build pages here (in build) so we can pass l10n to ChatPage.
+    // Pages list — rebuilt each build so l10n is current.
     final pages = [
       const DashboardPage(),
       const CalculatorPage(),
-      ChatPage(greeting: l10n?.assistantGeneralGreeting),
+      const ConversationsListPage(),
       const CameraPage(),
       const HistoryListPage(),
       const SettingsPage(),
