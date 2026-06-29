@@ -72,6 +72,10 @@ dependencies:
   flutter_gemma: ^1.1.2
   flutter_gemma_litertlm: ^1.0.2   # engine para modelos .litertlm (Gemma 3 1B-IT)
 
+  # Voz (STT + TTS) — Fase 2C
+  speech_to_text: ^7.0.0
+  flutter_tts: ^4.2.0
+
   flutter_localizations:
     sdk: flutter
 
