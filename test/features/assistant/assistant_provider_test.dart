@@ -123,27 +123,22 @@ void main() {
       expect(provider.messages.last.text, isNotEmpty);
     });
 
-    test('startSession clears messages and sets context', () async {
-      await provider.send('hola');
-      expect(provider.messages, isNotEmpty);
-
+    test('openOrCreateForDetection sets context on current conversation', () async {
       const ctx = AssistantContext(
         diseaseType: 'rona',
         diseaseName: 'Roña',
         recommendation: 'Aplicar tratamiento.',
+        imagePath: '/tmp/test_rona.jpg',
       );
-      await provider.startSession(context: ctx, greeting: 'Hola, soy AvoScan.');
+      await provider.openOrCreateForDetection(ctx);
 
-      expect(provider.messages.length, equals(1));
-      expect(provider.messages.first.role, equals(AssistantRole.assistant));
-      expect(provider.messages.first.text, equals('Hola, soy AvoScan.'));
-      // context is set on the current conversation
+      expect(provider.messages, isEmpty);
       expect(provider.context, isNotNull);
       expect(provider.context!.diseaseType, equals('rona'));
     });
 
-    test('startSession with no greeting leaves messages empty', () async {
-      await provider.startSession();
+    test('createGeneral opens conversation with no context', () async {
+      await provider.createGeneral();
       expect(provider.messages, isEmpty);
       expect(provider.context, isNull);
     });

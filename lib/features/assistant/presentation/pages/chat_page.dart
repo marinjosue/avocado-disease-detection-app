@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:aplication_tesis/core/theme/app_tokens.dart';
+import 'package:aplication_tesis/core/theme/disease_colors.dart';
 import 'package:aplication_tesis/core/widgets/status_badge.dart';
 import 'package:aplication_tesis/features/assistant/domain/assistant_context.dart';
 import 'package:aplication_tesis/features/assistant/domain/assistant_message.dart';
@@ -9,10 +12,7 @@ import 'package:aplication_tesis/features/assistant/presentation/providers/assis
 import 'package:aplication_tesis/l10n/app_localizations.dart';
 
 class ChatPage extends StatefulWidget {
-  const ChatPage({super.key, this.context, this.greeting});
-
-  final AssistantContext? context;
-  final String? greeting;
+  const ChatPage({super.key});
 
   @override
   State<ChatPage> createState() => _ChatPageState();
@@ -21,18 +21,6 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   final TextEditingController _textController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      context.read<AssistantProvider>().startSession(
-            context: widget.context,
-            greeting: widget.greeting,
-          );
-    });
-  }
 
   @override
   void dispose() {
@@ -65,70 +53,265 @@ class _ChatPageState extends State<ChatPage> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final cs = theme.colorScheme;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n?.assistant ?? 'Asistente IA'),
       ),
-      body: Column(
+      body: Consumer<AssistantProvider>(
+        builder: (context, provider, _) {
+          final current = provider.current;
+
+          // Guard: no conversation open yet (shouldn't happen in normal flow)
+          if (current == null) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final ctx = current.context;
+          final messages = current.messages;
+          final isThinking = provider.isThinking;
+          final itemCount = messages.length + (isThinking ? 1 : 0);
+
+          _scrollToBottom();
+
+          return Column(
+            children: [
+              // Disclaimer banner
+              _DisclaimerBanner(
+                text: l10n?.assistantDisclaimer ??
+                    'Orientativo — no sustituye a un agrónomo certificado.',
+              ),
+
+              // Detection context card at top when conversation has detection
+              if (ctx?.hasDetection == true)
+                _DetectionContextCard(ctx: ctx!, l10n: l10n, theme: theme),
+
+              // Message list or empty state
+              Expanded(
+                child: itemCount == 0
+                    ? _EmptyState(
+                        hasDetection: ctx?.hasDetection == true,
+                        diseaseName: ctx?.diseaseName,
+                        l10n: l10n,
+                        theme: theme,
+                      )
+                    : ListView.builder(
+                        controller: _scrollController,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.lg,
+                          vertical: AppSpacing.md,
+                        ),
+                        itemCount: itemCount,
+                        itemBuilder: (context, index) {
+                          // Thinking indicator as last synthetic bubble
+                          if (isThinking && index == messages.length) {
+                            return _ThinkingBubble(
+                              text: l10n?.assistantThinking ?? 'Pensando…',
+                            );
+                          }
+                          final msg = messages[index];
+                          return _MessageBubble(
+                            message: msg,
+                            colorScheme: theme.colorScheme,
+                            theme: theme,
+                          );
+                        },
+                      ),
+              ),
+
+              // Bottom input row
+              _InputRow(
+                controller: _textController,
+                hintText: l10n?.chatInputHint ?? 'Escribe tu pregunta…',
+                onSend: () {
+                  _sendMessage(provider);
+                },
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Empty state
+// ---------------------------------------------------------------------------
+
+class _EmptyState extends StatelessWidget {
+  const _EmptyState({
+    required this.hasDetection,
+    required this.diseaseName,
+    required this.l10n,
+    required this.theme,
+  });
+
+  final bool hasDetection;
+  final String? diseaseName;
+  final AppLocalizations? l10n;
+  final ThemeData theme;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = theme.colorScheme;
+    final greeting = hasDetection && diseaseName != null
+        ? (l10n?.localeName == 'es'
+            ? '¿Tienes alguna pregunta sobre $diseaseName?'
+            : 'Do you have any questions about $diseaseName?')
+        : (l10n?.assistantGeneralGreeting ?? '¡Hola! ¿En qué te puedo ayudar?');
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.xl),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.smart_toy_outlined,
+              size: 48,
+              color: cs.primary.withValues(alpha: 0.5),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            Text(
+              greeting,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: cs.onSurface.withValues(alpha: 0.7),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Detection context card (image + disease info)
+// ---------------------------------------------------------------------------
+
+class _DetectionContextCard extends StatelessWidget {
+  const _DetectionContextCard({
+    required this.ctx,
+    required this.l10n,
+    required this.theme,
+  });
+
+  final AssistantContext ctx;
+  final AppLocalizations? l10n;
+  final ThemeData theme;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = theme.colorScheme;
+    final confPct = ((ctx.confidence ?? 0.0) * 100).round();
+    final diseaseColors =
+        theme.extension<DiseaseColors>() ?? DiseaseColors.light;
+    final diseaseColor = diseaseColors.forType(ctx.diseaseType ?? 'healthy');
+
+    return Container(
+      width: double.infinity,
+      color: cs.surfaceContainerLow,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Disclaimer banner
-          _DisclaimerBanner(text: l10n?.assistantDisclaimer ?? 'Orientativo — no sustituye a un agrónomo certificado.'),
+          // Image thumbnail + disease info row
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.lg,
+              AppSpacing.md,
+              AppSpacing.lg,
+              AppSpacing.sm,
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Thumbnail
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(AppRadius.md),
+                  child: ctx.imagePath != null
+                      ? Image.file(
+                          File(ctx.imagePath!),
+                          width: 64,
+                          height: 64,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => _ImagePlaceholder(
+                            color: diseaseColor,
+                          ),
+                        )
+                      : _ImagePlaceholder(color: diseaseColor),
+                ),
+                const SizedBox(width: AppSpacing.md),
 
-          // Detection context chip row
-          if (widget.context?.hasDetection == true)
-            _ContextChipRow(ctx: widget.context!, l10n: l10n),
-
-          // Message list
-          Expanded(
-            child: Consumer<AssistantProvider>(
-              builder: (context, provider, _) {
-                _scrollToBottom();
-                final messages = provider.messages;
-                final isThinking = provider.isThinking;
-                final itemCount = messages.length + (isThinking ? 1 : 0);
-
-                if (itemCount == 0) {
-                  return Center(
-                    child: Text(
-                      l10n?.chatInputHint ?? 'Escribe tu pregunta…',
-                      style: theme.textTheme.bodySmall,
-                    ),
-                  );
-                }
-
-                return ListView.builder(
-                  controller: _scrollController,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.lg,
-                    vertical: AppSpacing.md,
+                // Disease info
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${l10n?.assistantTalkingAbout ?? 'Sobre'}:',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: cs.onSurface.withValues(alpha: 0.6),
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.xs),
+                      StatusBadge(
+                        diseaseType: ctx.diseaseType!,
+                        label: ctx.diseaseName ?? ctx.diseaseType!,
+                      ),
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        '$confPct% confianza',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: cs.onSurface.withValues(alpha: 0.7),
+                        ),
+                      ),
+                    ],
                   ),
-                  itemCount: itemCount,
-                  itemBuilder: (context, index) {
-                    // Thinking indicator as last synthetic bubble
-                    if (isThinking && index == messages.length) {
-                      return _ThinkingBubble(text: l10n?.assistantThinking ?? 'Pensando…');
-                    }
-                    final msg = messages[index];
-                    return _MessageBubble(message: msg, colorScheme: cs, theme: theme);
-                  },
-                );
-              },
+                ),
+              ],
             ),
           ),
 
-          // Bottom input row
-          _InputRow(
-            controller: _textController,
-            hintText: l10n?.chatInputHint ?? 'Escribe tu pregunta…',
-            onSend: () {
-              final provider = context.read<AssistantProvider>();
-              _sendMessage(provider);
-            },
-          ),
+          // Recommendation snippet
+          if (ctx.recommendation != null)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg,
+                0,
+                AppSpacing.lg,
+                AppSpacing.md,
+              ),
+              child: Text(
+                ctx.recommendation!,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: cs.onSurface.withValues(alpha: 0.65),
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ),
+
+          Divider(height: 1, color: cs.outlineVariant),
         ],
       ),
+    );
+  }
+}
+
+class _ImagePlaceholder extends StatelessWidget {
+  const _ImagePlaceholder({required this.color});
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 64,
+      height: 64,
+      color: color.withValues(alpha: 0.15),
+      child: Icon(Icons.eco_outlined, color: color, size: 32),
     );
   }
 }
@@ -155,7 +338,8 @@ class _DisclaimerBanner extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.info_outline, size: 14, color: cs.onSurface.withValues(alpha: 0.6)),
+          Icon(Icons.info_outline,
+              size: 14, color: cs.onSurface.withValues(alpha: 0.6)),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
@@ -164,48 +348,6 @@ class _DisclaimerBanner extends StatelessWidget {
                 color: cs.onSurface.withValues(alpha: 0.7),
               ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Detection context chip row
-// ---------------------------------------------------------------------------
-
-class _ContextChipRow extends StatelessWidget {
-  const _ContextChipRow({required this.ctx, required this.l10n});
-  final AssistantContext ctx;
-  final AppLocalizations? l10n;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final confPct = ((ctx.confidence ?? 0.0) * 100).round();
-    return Container(
-      width: double.infinity,
-      color: theme.colorScheme.surface,
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.sm,
-      ),
-      child: Wrap(
-        crossAxisAlignment: WrapCrossAlignment.center,
-        spacing: AppSpacing.sm,
-        children: [
-          Text(
-            '${l10n?.assistantTalkingAbout ?? 'Sobre'}:',
-            style: theme.textTheme.bodySmall,
-          ),
-          StatusBadge(
-            diseaseType: ctx.diseaseType!,
-            label: ctx.diseaseName ?? ctx.diseaseType!,
-          ),
-          Text(
-            '· $confPct%',
-            style: theme.textTheme.bodySmall,
           ),
         ],
       ),
@@ -234,7 +376,8 @@ class _MessageBubble extends StatelessWidget {
     final bgColor = isUser
         ? colorScheme.primary
         : colorScheme.surfaceContainerHighest;
-    final textColor = isUser ? colorScheme.onPrimary : colorScheme.onSurface;
+    final textColor =
+        isUser ? colorScheme.onPrimary : colorScheme.onSurface;
 
     return Align(
       alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
@@ -252,8 +395,10 @@ class _MessageBubble extends StatelessWidget {
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(AppRadius.lg),
             topRight: const Radius.circular(AppRadius.lg),
-            bottomLeft: Radius.circular(isUser ? AppRadius.lg : AppRadius.sm),
-            bottomRight: Radius.circular(isUser ? AppRadius.sm : AppRadius.lg),
+            bottomLeft:
+                Radius.circular(isUser ? AppRadius.lg : AppRadius.sm),
+            bottomRight:
+                Radius.circular(isUser ? AppRadius.sm : AppRadius.lg),
           ),
         ),
         child: Text(
@@ -397,7 +542,9 @@ class _InputRowState extends State<_InputRow> {
             IconButton(
               icon: Icon(
                 Icons.send,
-                color: _hasText ? cs.primary : cs.onSurface.withValues(alpha: 0.3),
+                color: _hasText
+                    ? cs.primary
+                    : cs.onSurface.withValues(alpha: 0.3),
               ),
               onPressed: _hasText ? widget.onSend : null,
               tooltip: 'Enviar',

@@ -11,6 +11,7 @@ import '../../../../core/widgets/section_header.dart';
 import '../providers/detection_provider.dart';
 import '../../../assistant/domain/assistant_context.dart';
 import '../../../assistant/presentation/pages/chat_page.dart';
+import '../../../assistant/presentation/providers/assistant_provider.dart';
 
 class HistoryListPage extends StatelessWidget {
   const HistoryListPage({super.key});
@@ -165,16 +166,18 @@ class HistoryListPage extends StatelessWidget {
                     TextButton.icon(
                       icon: const Icon(Icons.smart_toy),
                       label: Text(l10n.askAI),
-                      onPressed: () {
+                      onPressed: () async {
+                        final ctx = AssistantContext.fromDetection(
+                          detection,
+                          isSpanish: l10n.localeName == 'es',
+                        );
+                        final provider = context.read<AssistantProvider>();
+                        final nav = Navigator.of(context);
                         Navigator.pop(context);
-                        Navigator.of(context).push(
+                        await provider.openOrCreateForDetection(ctx);
+                        nav.push(
                           MaterialPageRoute(
-                            builder: (_) => ChatPage(
-                              context: AssistantContext.fromDetection(
-                                detection,
-                                isSpanish: l10n.localeName == 'es',
-                              ),
-                            ),
+                            builder: (_) => const ChatPage(),
                           ),
                         );
                       },

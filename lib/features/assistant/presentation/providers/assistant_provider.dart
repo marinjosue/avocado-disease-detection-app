@@ -206,41 +206,6 @@ class AssistantProvider extends ChangeNotifier {
   /// The [AssistantContext] of the current conversation, if any.
   AssistantContext? get context => _current?.context;
 
-  /// Backward-compat: resets/opens a conversation for [context], or creates a
-  /// general one. A [greeting] message (if provided) is seeded into the
-  /// in-memory message list synchronously so existing widget tests pass.
-  ///
-  /// Returns a [Future<void>] — callers that do not await it are safe; the
-  /// synchronous greeting seed is visible immediately.
-  Future<void> startSession({
-    AssistantContext? context,
-    String? greeting,
-  }) async {
-    if (context != null) {
-      await openOrCreateForDetection(context);
-    } else if (_current == null) {
-      await createGeneral();
-    } else {
-      // Already has a general conversation open — clear its messages.
-      final msgs = List<AssistantMessage>.from(_current!.messages)..clear();
-      _current = _current!.copyWith(messages: msgs);
-    }
-
-    // Seed the greeting into the in-memory list (not persisted) for compat.
-    if (greeting != null) {
-      final greetingMsg = AssistantMessage(
-        role: AssistantRole.assistant,
-        text: greeting,
-        timestamp: DateTime.now(),
-      );
-      final msgs =
-          List<AssistantMessage>.from(_current!.messages)..insert(0, greetingMsg);
-      _current = _current!.copyWith(messages: msgs);
-    }
-
-    notifyListeners();
-  }
-
   /// Clears all messages and resets context (legacy compat).
   void clear() {
     if (_current != null) {

@@ -16,6 +16,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import '../../../assistant/domain/assistant_context.dart';
 import '../../../assistant/presentation/pages/chat_page.dart';
+import '../../../assistant/presentation/providers/assistant_provider.dart';
 
 class CameraPage extends StatefulWidget {
   const CameraPage({super.key});
@@ -377,15 +378,17 @@ class _CameraPageState extends State<CameraPage> {
             child: SecondaryButton(
               icon: Icons.smart_toy,
               label: l10n.askAI,
-              onPressed: () {
-                Navigator.of(context).push(
+              onPressed: () async {
+                final ctx = AssistantContext.fromDetection(
+                  result,
+                  isSpanish: l10n.localeName == 'es',
+                );
+                final provider = context.read<AssistantProvider>();
+                final nav = Navigator.of(context);
+                await provider.openOrCreateForDetection(ctx);
+                nav.push(
                   MaterialPageRoute(
-                    builder: (_) => ChatPage(
-                      context: AssistantContext.fromDetection(
-                        result,
-                        isSpanish: l10n.localeName == 'es',
-                      ),
-                    ),
+                    builder: (_) => const ChatPage(),
                   ),
                 );
               },

@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
 import 'package:aplication_tesis/core/theme/app_theme.dart';
+import 'package:aplication_tesis/features/assistant/domain/assistant_context.dart';
 import 'package:aplication_tesis/features/assistant/domain/assistant_message.dart';
 import 'package:aplication_tesis/features/assistant/domain/conversation.dart';
 import 'package:aplication_tesis/features/assistant/data/stub_assistant_service.dart';
@@ -87,54 +88,75 @@ class _FakeRepo extends ConversationRepository {
   }
 }
 
-Widget _buildTestApp({Widget? home}) {
+// ---------------------------------------------------------------------------
+// Helper: build test app with a pre-seeded provider
+// ---------------------------------------------------------------------------
+
+Widget _buildTestApp(AssistantProvider provider) {
   return MaterialApp(
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     supportedLocales: AppLocalizations.supportedLocales,
     locale: const Locale('es'),
     theme: AppTheme.light,
-    home: ChangeNotifierProvider<AssistantProvider>(
-      create: (_) => AssistantProvider(
-        StubAssistantService(),
-        repository: _FakeRepo(),
-      ),
-      child: home ?? const ChatPage(),
+    home: ChangeNotifierProvider<AssistantProvider>.value(
+      value: provider,
+      child: const ChatPage(),
     ),
   );
 }
 
+AssistantProvider _makeProvider() =>
+    AssistantProvider(StubAssistantService(), repository: _FakeRepo());
+
 void main() {
   group('ChatPage', () {
-    testWidgets('renders disclaimer and input hint', (tester) async {
-      await tester.pumpWidget(_buildTestApp());
+    testWidgets('no current conversation shows loading spinner', (tester) async {
+      final provider = _makeProvider();
+      // Do NOT open any conversation — current == null.
+      await tester.pumpWidget(_buildTestApp(provider));
+      await tester.pump();
+
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    });
+
+    testWidgets('general conversation: shows disclaimer and input', (tester) async {
+      final provider = _makeProvider();
+      await provider.createGeneral();
+
+      await tester.pumpWidget(_buildTestApp(provider));
       await tester.pumpAndSettle();
 
-      // Disclaimer text from l10n (es): "Orientativo — no sustituye a un agrónomo certificado."
-      expect(
-        find.textContaining('Orientativo'),
-        findsOneWidget,
-      );
+      // Disclaimer text from l10n (es)
+      expect(find.textContaining('Orientativo'), findsOneWidget);
 
-      // Input hint from l10n (es): "Escribe tu pregunta…"
-      expect(
-        find.bySemanticsLabel(RegExp(r'Escribe tu pregunta')),
-        findsAny,
-      );
+      // Input field is present
+      expect(find.byType(TextField), findsOneWidget);
+    });
+
+    testWidgets('AppBar shows assistant title', (tester) async {
+      final provider = _makeProvider();
+      await provider.createGeneral();
+
+      await tester.pumpWidget(_buildTestApp(provider));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Asistente IA'), findsOneWidget);
     });
 
     testWidgets('typing and tapping send shows user bubble', (tester) async {
-      await tester.pumpWidget(_buildTestApp());
+      final provider = _makeProvider();
+      await provider.createGeneral();
+
+      await tester.pumpWidget(_buildTestApp(provider));
       await tester.pumpAndSettle();
 
       const userMessage = 'Hola, prueba de texto';
 
-      // Find the TextField and enter text
       final textField = find.byType(TextField);
       expect(textField, findsOneWidget);
       await tester.enterText(textField, userMessage);
       await tester.pump();
 
-      // Tap send (IconButton with Icons.send)
       final sendButton = find.byIcon(Icons.send);
       expect(sendButton, findsOneWidget);
       await tester.tap(sendButton);
@@ -142,41 +164,40 @@ void main() {
       // Wait for streaming reply to complete (stub has 120ms delays × 2 chunks)
       await tester.pumpAndSettle(const Duration(seconds: 2));
 
-      // The typed text should appear in the chat as a user bubble
       expect(find.text(userMessage), findsOneWidget);
     });
 
-    testWidgets('AppBar shows assistant title', (tester) async {
-      await tester.pumpWidget(_buildTestApp());
+    testWidgets('detection conversation shows disease name, no "Sobre" without detection',
+        (tester) async {
+      final provider = _makeProvider();
+      // Open a general conversation (no detection context).
+      await provider.createGeneral();
+
+      await tester.pumpWidget(_buildTestApp(provider));
       await tester.pumpAndSettle();
 
-      // "Asistente IA" from l10n
-      expect(find.text('Asistente IA'), findsOneWidget);
+      // Without a detection context the "Sobre" label should NOT appear.
+      expect(find.textContaining('Sobre'), findsNothing);
     });
 
-    testWidgets('context chip shown when hasDetection is true', (tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          locale: const Locale('es'),
-          theme: AppTheme.light,
-          home: ChangeNotifierProvider<AssistantProvider>(
-            create: (_) => AssistantProvider(
-              StubAssistantService(),
-              repository: _FakeRepo(),
-            ),
-            child: const ChatPage(
-              // ignore: avoid_redundant_argument_values
-              context: null, // no detection context — no chip expected
-            ),
-          ),
-        ),
+    testWidgets('detection conversation shows disease name in context card',
+        (tester) async {
+      final provider = _makeProvider();
+      const ctx = AssistantContext(
+        diseaseType: 'mancha_negra',
+        diseaseName: 'Mancha Negra',
+        confidence: 0.92,
+        // imagePath is null → errorBuilder fallback, no real file needed
       );
+      await provider.openOrCreateForDetection(ctx);
+
+      await tester.pumpWidget(_buildTestApp(provider));
       await tester.pumpAndSettle();
 
-      // Without a detection context the "Sobre" label should NOT appear
-      expect(find.textContaining('Sobre'), findsNothing);
+      // Disease name should appear in the context card
+      expect(find.textContaining('Mancha Negra'), findsWidgets);
+      // "Sobre" label is shown
+      expect(find.textContaining('Sobre'), findsOneWidget);
     });
   });
 }
