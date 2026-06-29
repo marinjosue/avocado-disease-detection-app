@@ -1,15 +1,100 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:aplication_tesis/features/assistant/domain/assistant_message.dart';
 import 'package:aplication_tesis/features/assistant/domain/assistant_context.dart';
+import 'package:aplication_tesis/features/assistant/domain/conversation.dart';
 import 'package:aplication_tesis/features/assistant/data/stub_assistant_service.dart';
+import 'package:aplication_tesis/features/assistant/data/conversation_repository.dart';
 import 'package:aplication_tesis/features/assistant/presentation/providers/assistant_provider.dart';
+
+// ---------------------------------------------------------------------------
+// In-memory fake ConversationRepository (no SQLite needed in tests)
+// ---------------------------------------------------------------------------
+
+class _FakeRepo extends ConversationRepository {
+  final List<Conversation> _convs = [];
+  final Map<int, List<AssistantMessage>> _messages = {};
+  int _nextId = 1;
+
+  _FakeRepo() : super(db: null);
+
+  @override
+  Future<Conversation> create(Conversation c) async {
+    final id = _nextId++;
+    final saved = c.copyWith(id: id);
+    _convs.add(saved);
+    _messages[id] = [];
+    return saved;
+  }
+
+  @override
+  Future<List<Conversation>> getAll() async =>
+      List<Conversation>.from(_convs.reversed);
+
+  @override
+  Future<Conversation?> getById(int id) async {
+    final idx = _convs.indexWhere((c) => c.id == id);
+    if (idx < 0) return null;
+    final conv = _convs[idx];
+    return conv.copyWith(messages: List.from(_messages[id] ?? []));
+  }
+
+  @override
+  Future<Conversation?> getByDetectionKey(String key) async {
+    final idx = _convs.lastIndexWhere((c) => c.detectionKey == key);
+    if (idx < 0) return null;
+    final conv = _convs[idx];
+    return conv.copyWith(messages: List.from(_messages[conv.id!] ?? []));
+  }
+
+  @override
+  Future<AssistantMessage> addMessage(
+    int conversationId,
+    AssistantMessage m,
+  ) async {
+    _messages.putIfAbsent(conversationId, () => []).add(m);
+    return m;
+  }
+
+  @override
+  Future<void> updateConversation(
+    int id, {
+    String? title,
+    DateTime? updatedAt,
+  }) async {
+    final idx = _convs.indexWhere((c) => c.id == id);
+    if (idx < 0) return;
+    _convs[idx] = _convs[idx].copyWith(
+      title: title ?? _convs[idx].title,
+      updatedAt: updatedAt ?? _convs[idx].updatedAt,
+    );
+  }
+
+  @override
+  Future<void> delete(int id) async {
+    _convs.removeWhere((c) => c.id == id);
+    _messages.remove(id);
+  }
+
+  @override
+  Future<void> deleteAll() async {
+    _convs.clear();
+    _messages.clear();
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Tests
+// ---------------------------------------------------------------------------
 
 void main() {
   group('AssistantProvider', () {
     late AssistantProvider provider;
 
     setUp(() {
-      provider = AssistantProvider(StubAssistantService());
+      provider = AssistantProvider(
+        StubAssistantService(),
+        repository: _FakeRepo(),
+      );
     });
 
     test('initial state: no messages, not thinking, no context', () {
@@ -47,16 +132,18 @@ void main() {
         diseaseName: 'Roña',
         recommendation: 'Aplicar tratamiento.',
       );
-      provider.startSession(context: ctx, greeting: 'Hola, soy AvoScan.');
+      await provider.startSession(context: ctx, greeting: 'Hola, soy AvoScan.');
 
       expect(provider.messages.length, equals(1));
       expect(provider.messages.first.role, equals(AssistantRole.assistant));
       expect(provider.messages.first.text, equals('Hola, soy AvoScan.'));
-      expect(provider.context, equals(ctx));
+      // context is set on the current conversation
+      expect(provider.context, isNotNull);
+      expect(provider.context!.diseaseType, equals('rona'));
     });
 
-    test('startSession with no greeting leaves messages empty', () {
-      provider.startSession();
+    test('startSession with no greeting leaves messages empty', () async {
+      await provider.startSession();
       expect(provider.messages, isEmpty);
       expect(provider.context, isNull);
     });
