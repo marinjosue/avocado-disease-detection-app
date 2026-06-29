@@ -21,8 +21,9 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: _createDB,
+      onUpgrade: _onUpgrade,
     );
   }
 
@@ -69,6 +70,39 @@ class DatabaseHelper {
       'updatedAt': DateTime.now().toIso8601String(),
       'isActive': 1,
     });
+
+    // Create conversation tables (added in version 2)
+    await _createConversationTables(db);
+  }
+
+  Future<void> _createConversationTables(Database db) async {
+    await db.execute('''
+      CREATE TABLE conversations (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        detectionKey TEXT,
+        contextJson TEXT,
+        createdAt TEXT NOT NULL,
+        updatedAt TEXT NOT NULL
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE conversation_messages (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        conversationId INTEGER NOT NULL,
+        role TEXT NOT NULL,
+        text TEXT NOT NULL,
+        timestamp TEXT NOT NULL,
+        FOREIGN KEY (conversationId) REFERENCES conversations (id)
+      )
+    ''');
+  }
+
+  Future<void> _onUpgrade(Database db, int oldV, int newV) async {
+    if (oldV < 2) {
+      await _createConversationTables(db);
+    }
   }
 
   // === WORKSPACE OPERATIONS ===
