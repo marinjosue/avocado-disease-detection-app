@@ -44,6 +44,12 @@ class AssistantProvider extends ChangeNotifier {
   Future<void> send(String text) async {
     if (text.trim().isEmpty) return;
 
+    // Snapshot history BEFORE adding the new user message or the empty
+    // assistant placeholder, so the service receives only prior clean turns.
+    final historySnapshot = List<AssistantMessage>.unmodifiable(
+      List<AssistantMessage>.from(_messages),
+    );
+
     _messages.add(
       AssistantMessage(
         role: AssistantRole.user,
@@ -68,7 +74,7 @@ class AssistantProvider extends ChangeNotifier {
       await for (final chunk in _service.reply(
         prompt: text.trim(),
         context: _context,
-        history: List.unmodifiable(_messages),
+        history: historySnapshot,
       )) {
         accumulated += chunk;
         _messages[_messages.length - 1] =

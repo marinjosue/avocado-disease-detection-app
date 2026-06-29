@@ -12,7 +12,7 @@ import 'core/services/onboarding_service.dart';
 import 'features/main/presentation/pages/main_page.dart';
 import 'features/onboarding/presentation/pages/onboarding_page.dart';
 import 'features/detection/presentation/providers/detection_provider.dart';
-import 'features/assistant/data/stub_assistant_service.dart';
+import 'features/assistant/data/assistant_service_router.dart';
 import 'features/assistant/presentation/providers/assistant_provider.dart';
 
 void main() async {
@@ -42,7 +42,7 @@ class AvoScanApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => DetectionProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(
-          create: (_) => AssistantProvider(StubAssistantService()),
+          create: (_) => AssistantProvider(AssistantServiceRouter()),
         ),
       ],
       child: Consumer2<LocaleProvider, ThemeProvider>(
