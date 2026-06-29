@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import '../domain/assistant_context.dart';
 import '../domain/assistant_message.dart';
 import '../domain/assistant_service.dart';
@@ -38,6 +40,7 @@ class AssistantServiceRouter implements AssistantService {
     List<AssistantMessage> history = const [],
   }) async* {
     final installed = await _modelService.isInstalled();
+    debugPrint('[Router] isInstalled=$installed');
     if (!installed) {
       yield* _stub.reply(prompt: prompt, context: context, history: history);
       return;
@@ -55,7 +58,8 @@ class AssistantServiceRouter implements AssistantService {
         emitted = true;
         yield token;
       }
-    } catch (_) {
+    } catch (e) {
+      debugPrint('[Router] Gemma failed, fallback to stub: $e');
       if (!emitted) {
         yield* _stub.reply(prompt: prompt, context: context, history: history);
       }

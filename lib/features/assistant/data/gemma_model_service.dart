@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_gemma/flutter_gemma.dart';
 
 /// Service responsible for checking and downloading the on-device Gemma model.
@@ -25,9 +26,36 @@ class GemmaModelService {
     final String? effectiveToken =
         (token == null || token.trim().isEmpty) ? null : token;
 
-    await FlutterGemma.installModel(modelType: ModelType.gemmaIt)
+    await FlutterGemma.installModel(
+          modelType: ModelType.gemmaIt,
+          fileType: ModelFileType.litertlm,
+        )
         .fromNetwork(url, token: effectiveToken)
         .withProgress((int p) => onProgress(p))
         .install();
+  }
+
+  /// Re-registers the already-downloaded model file as the active model
+  /// WITHOUT re-downloading it (install() is idempotent — skips the network
+  /// fetch when the file already exists).
+  ///
+  /// Call this at the start of each inference session to ensure the active
+  /// model identity is set, even after a cold app restart cleared it from
+  /// memory.
+  Future<void> ensureActive({
+    required String url,
+    String? token,
+  }) async {
+    debugPrint('[GemmaAI] ensureActive: start (url=$url)');
+    final String? effectiveToken =
+        (token == null || token.trim().isEmpty) ? null : token;
+
+    await FlutterGemma.installModel(
+          modelType: ModelType.gemmaIt,
+          fileType: ModelFileType.litertlm,
+        )
+        .fromNetwork(url, token: effectiveToken)
+        .install();
+    debugPrint('[GemmaAI] ensureActive: done');
   }
 }

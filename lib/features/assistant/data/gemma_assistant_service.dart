@@ -1,8 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_gemma/flutter_gemma.dart';
 
 import '../domain/assistant_context.dart';
 import '../domain/assistant_message.dart';
 import '../domain/assistant_service.dart';
+import 'assistant_prefs.dart';
+import 'gemma_model_service.dart';
 
 /// On-device inference via flutter_gemma (Gemma 3 1B-IT).
 ///
@@ -12,6 +15,12 @@ import '../domain/assistant_service.dart';
 ///
 /// Call [dispose] when the service is no longer needed to release native memory.
 class GemmaAssistantService implements AssistantService {
+  GemmaAssistantService({
+    AssistantPrefs? prefs,
+    GemmaModelService? modelService,
+  })  : _prefs = prefs ?? AssistantPrefs(),
+        _modelService = modelService ?? GemmaModelService();
+
   static const _systemInstruction =
       'Eres el asistente de avocadoIA, un agrónomo conciso. '
       'Responde en español, breve y claro, sobre enfermedades del aguacate '
@@ -19,13 +28,27 @@ class GemmaAssistantService implements AssistantService {
       'Si hay contexto del análisis, úsalo. '
       'Cierra recordando que es orientativo y no sustituye a un agrónomo certificado.';
 
+  final AssistantPrefs _prefs;
+  final GemmaModelService _modelService;
   InferenceModel? _cachedModel;
 
-  Future<InferenceModel> _getModel() async {
-    _cachedModel ??= await FlutterGemma.getActiveModel(
+  Future<InferenceModel> _ensureModel() async {
+    if (_cachedModel != null) return _cachedModel!;
+
+    final url = await _prefs.getModelUrl();
+    final token = await _prefs.getToken();
+
+    debugPrint('[GemmaAI] ensureActive: calling (url=$url)');
+    await _modelService.ensureActive(url: url, token: token);
+    debugPrint('[GemmaAI] ensureActive: completed');
+
+    debugPrint('[GemmaAI] getActiveModel: calling');
+    _cachedModel = await FlutterGemma.getActiveModel(
       maxTokens: 1024,
       preferredBackend: PreferredBackend.gpu,
     );
+    debugPrint('[GemmaAI] getActiveModel: done');
+
     return _cachedModel!;
   }
 
@@ -63,15 +86,27 @@ class GemmaAssistantService implements AssistantService {
 
     final fullPrompt = buffer.toString();
 
-    final model = await _getModel();
-    // Fresh chat per reply — model weights are cached, KV cache is not.
-    final chat = await model.createChat(temperature: 0.3);
-    await chat.addQueryChunk(Message.text(text: fullPrompt, isUser: true));
+    try {
+      final model = await _ensureModel();
+      debugPrint('[GemmaAI] createChat: calling');
+      // Fresh chat per reply — model weights are cached, KV cache is not.
+      final chat = await model.createChat(temperature: 0.3);
+      debugPrint('[GemmaAI] createChat: done');
+      await chat.addQueryChunk(Message.text(text: fullPrompt, isUser: true));
 
-    await for (final response in chat.generateChatResponseAsync()) {
-      if (response is TextResponse) {
-        yield response.token;
+      var firstToken = true;
+      await for (final response in chat.generateChatResponseAsync()) {
+        if (response is TextResponse) {
+          if (firstToken) {
+            debugPrint('[GemmaAI] first token received');
+            firstToken = false;
+          }
+          yield response.token;
+        }
       }
+    } catch (e, st) {
+      debugPrint('[GemmaAI] ERROR: $e\n$st');
+      rethrow;
     }
   }
 

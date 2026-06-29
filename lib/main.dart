@@ -20,7 +20,7 @@ void main() async {
 
   // Registra los engines de IA on-device (Fase 2B). El token de HuggingFace
   // se configura en la app antes de descargar el modelo.
-  FlutterGemma.initialize();
+  await FlutterGemma.initialize();
 
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
