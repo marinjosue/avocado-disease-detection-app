@@ -18,4 +18,18 @@ class AssistantMessage {
       timestamp: timestamp,
     );
   }
+
+  Map<String, dynamic> toJson() => {
+        'role': role.name,
+        'text': text,
+        'timestamp': timestamp.toIso8601String(),
+      };
+
+  factory AssistantMessage.fromJson(Map<String, dynamic> j) {
+    return AssistantMessage(
+      role: AssistantRole.values.byName(j['role'] as String),
+      text: j['text'] as String,
+      timestamp: DateTime.parse(j['timestamp'] as String),
+    );
+  }
 }

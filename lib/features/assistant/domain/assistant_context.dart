@@ -6,6 +6,7 @@ class AssistantContext {
   final String? diseaseName;
   final String? recommendation;
   final String? historySummary;
+  final String? imagePath;
 
   const AssistantContext({
     this.diseaseType,
@@ -13,6 +14,7 @@ class AssistantContext {
     this.diseaseName,
     this.recommendation,
     this.historySummary,
+    this.imagePath,
   });
 
   factory AssistantContext.fromDetection(
@@ -25,6 +27,7 @@ class AssistantContext {
       diseaseName: isSpanish ? r.getDiseaseNameES() : r.getDiseaseNameEN(),
       recommendation:
           isSpanish ? r.getRecommendationES() : r.getRecommendationEN(),
+      imagePath: r.imagePath,
     );
   }
 
@@ -46,6 +49,26 @@ class AssistantContext {
           '$healthy healthy, $manchaNegra Black Spot, $rona Scab.';
     }
     return AssistantContext(historySummary: summary);
+  }
+
+  Map<String, dynamic> toJson() => {
+        'diseaseType': diseaseType,
+        'confidence': confidence,
+        'diseaseName': diseaseName,
+        'recommendation': recommendation,
+        'historySummary': historySummary,
+        'imagePath': imagePath,
+      };
+
+  factory AssistantContext.fromJson(Map<String, dynamic> j) {
+    return AssistantContext(
+      diseaseType: j['diseaseType'] as String?,
+      confidence: (j['confidence'] as num?)?.toDouble(),
+      diseaseName: j['diseaseName'] as String?,
+      recommendation: j['recommendation'] as String?,
+      historySummary: j['historySummary'] as String?,
+      imagePath: j['imagePath'] as String?,
+    );
   }
 
   bool get hasDetection => diseaseType != null;
