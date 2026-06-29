@@ -28,6 +28,33 @@ void main() {
       );
       expect(msg.toJson()['role'], 'user');
     });
+
+    test('round-trip preserves audioPath when set', () {
+      final original = AssistantMessage(
+        role: AssistantRole.user,
+        text: 'nota de voz',
+        timestamp: DateTime.utc(2026, 6, 29, 12, 0, 0),
+        audioPath: '/a/b.m4a',
+      );
+
+      final json = original.toJson();
+      final restored = AssistantMessage.fromJson(json);
+
+      expect(restored.audioPath, '/a/b.m4a');
+    });
+
+    test('round-trip keeps audioPath null when not set', () {
+      final original = AssistantMessage(
+        role: AssistantRole.user,
+        text: 'texto plano',
+        timestamp: DateTime.utc(2026, 6, 29),
+      );
+
+      final json = original.toJson();
+      final restored = AssistantMessage.fromJson(json);
+
+      expect(restored.audioPath, isNull);
+    });
   });
 
   group('AssistantContext serialization', () {

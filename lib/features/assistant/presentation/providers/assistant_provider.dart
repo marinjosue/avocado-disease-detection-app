@@ -87,7 +87,8 @@ class AssistantProvider extends ChangeNotifier {
   }
 
   /// Sends a user message, streams the assistant reply, and persists both.
-  Future<void> send(String text) async {
+  /// Optional [audioPath] attaches a recorded audio file to the user message.
+  Future<void> send(String text, {String? audioPath}) async {
     if (text.trim().isEmpty) return;
 
     // Ensure a current conversation exists.
@@ -103,6 +104,7 @@ class AssistantProvider extends ChangeNotifier {
       role: AssistantRole.user,
       text: text.trim(),
       timestamp: now,
+      audioPath: audioPath,
     );
 
     // Add to in-memory list and notify.

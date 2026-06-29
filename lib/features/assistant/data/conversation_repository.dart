@@ -97,6 +97,7 @@ class ConversationRepository {
       'role': m.role.name,
       'text': m.text,
       'timestamp': m.timestamp.toIso8601String(),
+      'audioPath': m.audioPath,
     });
     return m;
   }
@@ -189,6 +190,7 @@ class ConversationRepository {
             role: AssistantRole.values.byName(r['role'] as String),
             text: r['text'] as String,
             timestamp: DateTime.parse(r['timestamp'] as String),
+            audioPath: r['audioPath'] as String?,
           ),
         )
         .toList();

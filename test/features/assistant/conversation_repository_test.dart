@@ -24,6 +24,7 @@ Future<void> _createSchema(Database db, int version) async {
       role TEXT NOT NULL,
       text TEXT NOT NULL,
       timestamp TEXT NOT NULL,
+      audioPath TEXT,
       FOREIGN KEY (conversationId) REFERENCES conversations (id)
     )
   ''');
@@ -201,6 +202,33 @@ void main() {
       expect(await repo.getAll(), isEmpty);
       final msgs = await db.query('conversation_messages');
       expect(msgs, isEmpty);
+    });
+
+    test('addMessage with audioPath → getById returns matching audioPath', () async {
+      final conv = await repo.create(makeConv());
+      final msgWithAudio = AssistantMessage(
+        role: AssistantRole.user,
+        text: 'nota de voz',
+        timestamp: DateTime.utc(2026, 6, 29, 12, 0),
+        audioPath: '/data/voice/note_001.m4a',
+      );
+      await repo.addMessage(conv.id!, msgWithAudio);
+
+      final loaded = await repo.getById(conv.id!);
+
+      expect(loaded, isNotNull);
+      expect(loaded!.messages, hasLength(1));
+      expect(loaded.messages.first.audioPath, '/data/voice/note_001.m4a');
+    });
+
+    test('addMessage without audioPath → getById returns null audioPath', () async {
+      final conv = await repo.create(makeConv());
+      await repo.addMessage(conv.id!, makeMsg('texto normal'));
+
+      final loaded = await repo.getById(conv.id!);
+
+      expect(loaded, isNotNull);
+      expect(loaded!.messages.first.audioPath, isNull);
     });
   });
 }

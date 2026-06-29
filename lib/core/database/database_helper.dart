@@ -21,7 +21,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 2,
+      version: 3,
       onCreate: _createDB,
       onUpgrade: _onUpgrade,
     );
@@ -94,6 +94,7 @@ class DatabaseHelper {
         role TEXT NOT NULL,
         text TEXT NOT NULL,
         timestamp TEXT NOT NULL,
+        audioPath TEXT,
         FOREIGN KEY (conversationId) REFERENCES conversations (id)
       )
     ''');
@@ -102,6 +103,11 @@ class DatabaseHelper {
   Future<void> _onUpgrade(Database db, int oldV, int newV) async {
     if (oldV < 2) {
       await _createConversationTables(db);
+    }
+    if (oldV < 3) {
+      await db.execute(
+        'ALTER TABLE conversation_messages ADD COLUMN audioPath TEXT',
+      );
     }
   }
 

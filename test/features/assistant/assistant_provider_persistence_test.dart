@@ -152,6 +152,30 @@ void main() {
       expect(stored[1].text, isNotEmpty);
     });
 
+    test('send with audioPath persists audioPath on user message', () async {
+      await provider.createGeneral();
+      final id = provider.current!.id!;
+
+      await provider.send('hola', audioPath: '/x.m4a');
+
+      final stored = repo.storedMessages(id);
+      expect(stored, isNotEmpty);
+      final userMsg = stored.firstWhere((m) => m.role == AssistantRole.user);
+      expect(userMsg.audioPath, '/x.m4a');
+    });
+
+    test('send without audioPath keeps audioPath null on user message', () async {
+      await provider.createGeneral();
+      final id = provider.current!.id!;
+
+      await provider.send('sin audio');
+
+      final stored = repo.storedMessages(id);
+      expect(stored, isNotEmpty);
+      final userMsg = stored.firstWhere((m) => m.role == AssistantRole.user);
+      expect(userMsg.audioPath, isNull);
+    });
+
     test('send auto-titles a general conversation from the first user message', () async {
       await provider.createGeneral();
 

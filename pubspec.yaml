@@ -76,6 +76,10 @@ dependencies:
   speech_to_text: ^7.0.0
   flutter_tts: ^4.2.0
 
+  # Audio (grabación + reproducción) — Fase 2D notas de voz
+  record: ^6.0.0
+  audioplayers: ^6.1.0
+
   flutter_localizations:
     sdk: flutter
   gpt_markdown: ^1.1.7
