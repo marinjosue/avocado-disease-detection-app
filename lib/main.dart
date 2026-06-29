@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_gemma/flutter_gemma.dart';
+import 'package:flutter_gemma_litertlm/flutter_gemma_litertlm.dart';
 
 import 'l10n/app_localizations.dart';
 import 'core/theme/app_theme.dart';
@@ -18,9 +19,9 @@ import 'features/assistant/presentation/providers/assistant_provider.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Registra los engines de IA on-device (Fase 2B). El token de HuggingFace
-  // se configura en la app antes de descargar el modelo.
-  await FlutterGemma.initialize();
+  // Registra el engine de inferencia on-device (LiteRT-LM para .litertlm).
+  // Sin esto, getActiveModel falla con "No inference engine can handle this model".
+  await FlutterGemma.initialize(inferenceEngines: [LiteRtLmEngine()]);
 
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
