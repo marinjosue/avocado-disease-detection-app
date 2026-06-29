@@ -456,4 +456,41 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get assistantPlaceholderReply =>
       'I\'m still learning. For now I can explain detection results and general care.';
+
+  @override
+  String get modelSetupTitle => 'AI Assistant — Model';
+
+  @override
+  String get modelSetupIntro =>
+      'To use the assistant offline, download the language model to your device.';
+
+  @override
+  String get wifiWarning => 'Use WiFi: the download is ~584 MB.';
+
+  @override
+  String get hfTokenLabel => 'HuggingFace Token';
+
+  @override
+  String get hfTokenHint => 'hf_… (stored only on your device)';
+
+  @override
+  String get modelUrlLabel => 'Model URL';
+
+  @override
+  String get downloadModel => 'Download model';
+
+  @override
+  String get downloading => 'Downloading…';
+
+  @override
+  String get modelReady => 'Model ready';
+
+  @override
+  String get modelNotReady => 'Model not installed';
+
+  @override
+  String get downloadError => 'Could not download the model';
+
+  @override
+  String get aiModelTile => 'Assistant model (AI)';
 }

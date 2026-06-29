@@ -961,6 +961,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'I\'m still learning. For now I can explain detection results and general care.'**
   String get assistantPlaceholderReply;
+
+  /// No description provided for @modelSetupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Assistant — Model'**
+  String get modelSetupTitle;
+
+  /// No description provided for @modelSetupIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'To use the assistant offline, download the language model to your device.'**
+  String get modelSetupIntro;
+
+  /// No description provided for @wifiWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Use WiFi: the download is ~584 MB.'**
+  String get wifiWarning;
+
+  /// No description provided for @hfTokenLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'HuggingFace Token'**
+  String get hfTokenLabel;
+
+  /// No description provided for @hfTokenHint.
+  ///
+  /// In en, this message translates to:
+  /// **'hf_… (stored only on your device)'**
+  String get hfTokenHint;
+
+  /// No description provided for @modelUrlLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Model URL'**
+  String get modelUrlLabel;
+
+  /// No description provided for @downloadModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Download model'**
+  String get downloadModel;
+
+  /// No description provided for @downloading.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading…'**
+  String get downloading;
+
+  /// No description provided for @modelReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Model ready'**
+  String get modelReady;
+
+  /// No description provided for @modelNotReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Model not installed'**
+  String get modelNotReady;
+
+  /// No description provided for @downloadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not download the model'**
+  String get downloadError;
+
+  /// No description provided for @aiModelTile.
+  ///
+  /// In en, this message translates to:
+  /// **'Assistant model (AI)'**
+  String get aiModelTile;
 }
 
 class _AppLocalizationsDelegate

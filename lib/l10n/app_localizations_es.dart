@@ -458,4 +458,41 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get assistantPlaceholderReply =>
       'Aún estoy aprendiendo. Por ahora puedo explicar resultados de detección y cuidados generales.';
+
+  @override
+  String get modelSetupTitle => 'Asistente IA — Modelo';
+
+  @override
+  String get modelSetupIntro =>
+      'Para usar el asistente fuera de línea, descarga el modelo de lenguaje en tu dispositivo.';
+
+  @override
+  String get wifiWarning => 'Usa WiFi: la descarga es de ~584 MB.';
+
+  @override
+  String get hfTokenLabel => 'Token de HuggingFace';
+
+  @override
+  String get hfTokenHint => 'hf_… (se guarda solo en tu dispositivo)';
+
+  @override
+  String get modelUrlLabel => 'URL del modelo';
+
+  @override
+  String get downloadModel => 'Descargar modelo';
+
+  @override
+  String get downloading => 'Descargando…';
+
+  @override
+  String get modelReady => 'Modelo listo';
+
+  @override
+  String get modelNotReady => 'Modelo no instalado';
+
+  @override
+  String get downloadError => 'No se pudo descargar el modelo';
+
+  @override
+  String get aiModelTile => 'Modelo del asistente (IA)';
 }

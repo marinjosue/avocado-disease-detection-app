@@ -7,6 +7,7 @@ import '../../../../core/widgets/section_header.dart';
 import '../../../../core/widgets/theme_mode_selector.dart';
 import '../../../../core/services/onboarding_service.dart';
 import '../../../../core/theme/app_tokens.dart';
+import '../../../assistant/presentation/pages/model_setup_page.dart';
 import '../../../onboarding/presentation/pages/onboarding_page.dart';
 
 class SettingsPage extends StatelessWidget {
@@ -44,6 +45,25 @@ class SettingsPage extends StatelessWidget {
           SectionHeader(title: l10n.language),
           const SizedBox(height: AppSpacing.sm),
           _buildLanguageSelector(context),
+
+          const SizedBox(height: AppSpacing.xl),
+          const Divider(),
+          const SizedBox(height: AppSpacing.xl),
+
+          // ── Asistente IA ────────────────────────────────────────────────
+          SectionHeader(title: l10n.aiModelTile),
+          const SizedBox(height: AppSpacing.sm),
+          Card(
+            margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+            child: ListTile(
+              leading: Icon(Icons.smart_toy, color: Theme.of(context).colorScheme.primary),
+              title: Text(l10n.aiModelTile, style: Theme.of(context).textTheme.titleMedium),
+              trailing: Icon(Icons.chevron_right, color: Theme.of(context).colorScheme.onSurfaceVariant),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const ModelSetupPage()),
+              ),
+            ),
+          ),
 
           const SizedBox(height: AppSpacing.xl),
           const Divider(),

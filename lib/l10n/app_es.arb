@@ -143,5 +143,17 @@
   "chatInputHint": "Escribe tu pregunta…",
   "send": "Enviar",
   "assistantThinking": "Pensando…",
-  "assistantPlaceholderReply": "Aún estoy aprendiendo. Por ahora puedo explicar resultados de detección y cuidados generales."
+  "assistantPlaceholderReply": "Aún estoy aprendiendo. Por ahora puedo explicar resultados de detección y cuidados generales.",
+  "modelSetupTitle": "Asistente IA — Modelo",
+  "modelSetupIntro": "Para usar el asistente fuera de línea, descarga el modelo de lenguaje en tu dispositivo.",
+  "wifiWarning": "Usa WiFi: la descarga es de ~584 MB.",
+  "hfTokenLabel": "Token de HuggingFace",
+  "hfTokenHint": "hf_… (se guarda solo en tu dispositivo)",
+  "modelUrlLabel": "URL del modelo",
+  "downloadModel": "Descargar modelo",
+  "downloading": "Descargando…",
+  "modelReady": "Modelo listo",
+  "modelNotReady": "Modelo no instalado",
+  "downloadError": "No se pudo descargar el modelo",
+  "aiModelTile": "Modelo del asistente (IA)"
 }

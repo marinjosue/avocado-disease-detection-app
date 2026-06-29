@@ -296,5 +296,17 @@
   "chatInputHint": "Type your question…",
   "send": "Send",
   "assistantThinking": "Thinking…",
-  "assistantPlaceholderReply": "I'm still learning. For now I can explain detection results and general care."
+  "assistantPlaceholderReply": "I'm still learning. For now I can explain detection results and general care.",
+  "modelSetupTitle": "AI Assistant — Model",
+  "modelSetupIntro": "To use the assistant offline, download the language model to your device.",
+  "wifiWarning": "Use WiFi: the download is ~584 MB.",
+  "hfTokenLabel": "HuggingFace Token",
+  "hfTokenHint": "hf_… (stored only on your device)",
+  "modelUrlLabel": "Model URL",
+  "downloadModel": "Download model",
+  "downloading": "Downloading…",
+  "modelReady": "Model ready",
+  "modelNotReady": "Model not installed",
+  "downloadError": "Could not download the model",
+  "aiModelTile": "Assistant model (AI)"
 }
