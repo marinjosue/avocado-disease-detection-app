@@ -35,6 +35,22 @@ class _FailingGemmaService implements AssistantService {
   }
 }
 
+/// An [AssistantService] that yields one token then throws mid-stream.
+class _MidStreamFailingGemmaService implements AssistantService {
+  _MidStreamFailingGemmaService(this._firstToken);
+  final String _firstToken;
+
+  @override
+  Stream<String> reply({
+    required String prompt,
+    AssistantContext? context,
+    List<AssistantMessage> history = const [],
+  }) async* {
+    yield _firstToken;
+    throw Exception('Simulated Gemma mid-stream failure');
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
@@ -91,6 +107,24 @@ void main() {
         final result = await router.reply(prompt: 'hola').join();
 
         expect(result, equals('Respuesta Gemma'));
+      },
+    );
+
+    test(
+      'does NOT append stub when Gemma emits a token then throws mid-stream',
+      () async {
+        final router = AssistantServiceRouter(
+          stub: StubAssistantService(),
+          modelService: _FakeModelServiceInstalled(),
+          gemmaFactory: () => _MidStreamFailingGemmaService('Hola'),
+        );
+
+        final result = await router.reply(prompt: 'hola').join();
+
+        // The partial Gemma token must be present.
+        expect(result, contains('Hola'));
+        // The stub reply must NOT have been appended.
+        expect(result, isNot(contains('AvoScan AI')));
       },
     );
 

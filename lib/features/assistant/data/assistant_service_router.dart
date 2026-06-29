@@ -43,24 +43,23 @@ class AssistantServiceRouter implements AssistantService {
       return;
     }
 
-    // Model is installed — try Gemma, fall back to stub on any error.
-    final gemmaStream = _getGemma().reply(
-      prompt: prompt,
-      context: context,
-      history: history,
-    );
-
-    var gemmaFailed = false;
+    // Model is installed — try Gemma, fall back to stub ONLY if it fails
+    // before emitting any token (avoids garbled double-answer on mid-stream error).
+    var emitted = false;
     try {
-      await for (final token in gemmaStream) {
+      await for (final token in _getGemma().reply(
+        prompt: prompt,
+        context: context,
+        history: history,
+      )) {
+        emitted = true;
         yield token;
       }
     } catch (_) {
-      gemmaFailed = true;
-    }
-
-    if (gemmaFailed) {
-      yield* _stub.reply(prompt: prompt, context: context, history: history);
+      if (!emitted) {
+        yield* _stub.reply(prompt: prompt, context: context, history: history);
+      }
+      // if tokens were already emitted, stop here — do NOT append the stub
     }
   }
 }
