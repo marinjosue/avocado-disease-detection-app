@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_gemma/flutter_gemma.dart';
 
 import 'l10n/app_localizations.dart';
 import 'core/theme/app_theme.dart';
@@ -16,6 +17,10 @@ import 'features/assistant/presentation/providers/assistant_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Registra los engines de IA on-device (Fase 2B). El token de HuggingFace
+  // se configura en la app antes de descargar el modelo.
+  FlutterGemma.initialize();
 
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,

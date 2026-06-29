@@ -67,6 +67,11 @@ dependencies:
   get_it: ^7.6.7
   uuid: ^4.3.3
   path: ^1.9.0
+
+  # IA on-device (asistente) — Fase 2B
+  flutter_gemma: ^1.1.2
+  flutter_gemma_litertlm: ^1.0.2   # engine para modelos .litertlm (Gemma 3 1B-IT)
+
   flutter_localizations:
     sdk: flutter
 
