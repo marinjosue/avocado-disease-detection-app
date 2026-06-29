@@ -1093,6 +1093,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Conversation'**
   String get untitledConversation;
+
+  /// Tooltip for the microphone button to start voice dictation
+  ///
+  /// In en, this message translates to:
+  /// **'Dictate'**
+  String get voiceDictate;
+
+  /// Label shown while the app is listening for speech
+  ///
+  /// In en, this message translates to:
+  /// **'Listening…'**
+  String get voiceListening;
+
+  /// Tooltip for the button that stops voice dictation or TTS
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get voiceStop;
+
+  /// Tooltip for the per-message play button
+  ///
+  /// In en, this message translates to:
+  /// **'Play'**
+  String get voicePlay;
+
+  /// Tooltip for the AppBar mute toggle when auto-read is currently enabled
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-read on'**
+  String get voiceAutoReadOn;
+
+  /// Tooltip for the AppBar mute toggle when auto-read is currently disabled
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-read off'**
+  String get voiceAutoReadOff;
+
+  /// Message shown when microphone permission is denied
+  ///
+  /// In en, this message translates to:
+  /// **'Microphone permission denied'**
+  String get micDenied;
+
+  /// Message shown when STT/TTS is not available on the device
+  ///
+  /// In en, this message translates to:
+  /// **'Voice not available on this device'**
+  String get voiceUnavailable;
 }
 
 class _AppLocalizationsDelegate

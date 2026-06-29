@@ -348,5 +348,37 @@
   "untitledConversation": "Conversation",
   "@untitledConversation": {
     "description": "Fallback title when a conversation has no title"
+  },
+  "voiceDictate": "Dictate",
+  "@voiceDictate": {
+    "description": "Tooltip for the microphone button to start voice dictation"
+  },
+  "voiceListening": "Listening…",
+  "@voiceListening": {
+    "description": "Label shown while the app is listening for speech"
+  },
+  "voiceStop": "Stop",
+  "@voiceStop": {
+    "description": "Tooltip for the button that stops voice dictation or TTS"
+  },
+  "voicePlay": "Play",
+  "@voicePlay": {
+    "description": "Tooltip for the per-message play button"
+  },
+  "voiceAutoReadOn": "Auto-read on",
+  "@voiceAutoReadOn": {
+    "description": "Tooltip for the AppBar mute toggle when auto-read is currently enabled"
+  },
+  "voiceAutoReadOff": "Auto-read off",
+  "@voiceAutoReadOff": {
+    "description": "Tooltip for the AppBar mute toggle when auto-read is currently disabled"
+  },
+  "micDenied": "Microphone permission denied",
+  "@micDenied": {
+    "description": "Message shown when microphone permission is denied"
+  },
+  "voiceUnavailable": "Voice not available on this device",
+  "@voiceUnavailable": {
+    "description": "Message shown when STT/TTS is not available on the device"
   }
 }

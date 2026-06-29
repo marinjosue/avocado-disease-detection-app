@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:aplication_tesis/core/theme/app_theme.dart';
 import 'package:aplication_tesis/features/assistant/domain/assistant_context.dart';
@@ -8,9 +9,44 @@ import 'package:aplication_tesis/features/assistant/domain/assistant_message.dar
 import 'package:aplication_tesis/features/assistant/domain/conversation.dart';
 import 'package:aplication_tesis/features/assistant/data/stub_assistant_service.dart';
 import 'package:aplication_tesis/features/assistant/data/conversation_repository.dart';
+import 'package:aplication_tesis/features/assistant/data/voice_prefs.dart';
+import 'package:aplication_tesis/features/assistant/domain/voice_services.dart';
 import 'package:aplication_tesis/features/assistant/presentation/pages/chat_page.dart';
 import 'package:aplication_tesis/features/assistant/presentation/providers/assistant_provider.dart';
+import 'package:aplication_tesis/features/assistant/presentation/providers/voice_controller.dart';
 import 'package:aplication_tesis/l10n/app_localizations.dart';
+
+// ---------------------------------------------------------------------------
+// Minimal fake STT / TTS — no real plugins used
+// ---------------------------------------------------------------------------
+
+class _FakeStt implements SpeechToTextService {
+  @override
+  Future<bool> init() async => true;
+  @override
+  bool get isAvailable => true;
+  @override
+  bool get isListening => false;
+  @override
+  Future<void> startListening({
+    required void Function(String partial) onPartial,
+    required void Function(String finalText) onFinal,
+    String localeId = 'es_ES',
+  }) async {}
+  @override
+  Future<void> stop() async {}
+}
+
+class _FakeTts implements TtsService {
+  @override
+  Future<void> init() async {}
+  @override
+  Future<void> speak(String text, {String languageTag = 'es-ES'}) async {}
+  @override
+  Future<void> stop() async {}
+  @override
+  set onSpeakingChanged(void Function(bool speaking) cb) {}
+}
 
 // ---------------------------------------------------------------------------
 // In-memory fake repository — avoids real SQLite in widget tests
@@ -89,17 +125,24 @@ class _FakeRepo extends ConversationRepository {
 }
 
 // ---------------------------------------------------------------------------
-// Helper: build test app with a pre-seeded provider
+// Helper: build test app with a pre-seeded provider + fake VoiceController
 // ---------------------------------------------------------------------------
 
+VoiceController _makeVoice() =>
+    VoiceController(_FakeStt(), _FakeTts(), VoicePrefs());
+
 Widget _buildTestApp(AssistantProvider provider) {
+  final voice = _makeVoice();
   return MaterialApp(
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     supportedLocales: AppLocalizations.supportedLocales,
     locale: const Locale('es'),
     theme: AppTheme.light,
-    home: ChangeNotifierProvider<AssistantProvider>.value(
-      value: provider,
+    home: MultiProvider(
+      providers: [
+        ChangeNotifierProvider<AssistantProvider>.value(value: provider),
+        ChangeNotifierProvider<VoiceController>.value(value: voice),
+      ],
       child: const ChatPage(),
     ),
   );
@@ -109,6 +152,10 @@ AssistantProvider _makeProvider() =>
     AssistantProvider(StubAssistantService(), repository: _FakeRepo());
 
 void main() {
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+  });
+
   group('ChatPage', () {
     testWidgets('no current conversation shows loading spinner', (tester) async {
       final provider = _makeProvider();

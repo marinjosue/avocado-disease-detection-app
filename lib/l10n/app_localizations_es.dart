@@ -527,4 +527,28 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get untitledConversation => 'Conversación';
+
+  @override
+  String get voiceDictate => 'Dictar';
+
+  @override
+  String get voiceListening => 'Escuchando…';
+
+  @override
+  String get voiceStop => 'Detener';
+
+  @override
+  String get voicePlay => 'Reproducir';
+
+  @override
+  String get voiceAutoReadOn => 'Lectura automática activada';
+
+  @override
+  String get voiceAutoReadOff => 'Lectura automática desactivada';
+
+  @override
+  String get micDenied => 'Permiso de micrófono denegado';
+
+  @override
+  String get voiceUnavailable => 'Voz no disponible en este dispositivo';
 }

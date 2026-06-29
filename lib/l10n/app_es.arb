@@ -165,5 +165,13 @@
   "deleteAllConversations": "Eliminar todas",
   "deleteAllConversationsMsg": "Todas las conversaciones se eliminarán permanentemente.",
   "conversationDeleted": "Conversación eliminada",
-  "untitledConversation": "Conversación"
+  "untitledConversation": "Conversación",
+  "voiceDictate": "Dictar",
+  "voiceListening": "Escuchando…",
+  "voiceStop": "Detener",
+  "voicePlay": "Reproducir",
+  "voiceAutoReadOn": "Lectura automática activada",
+  "voiceAutoReadOff": "Lectura automática desactivada",
+  "micDenied": "Permiso de micrófono denegado",
+  "voiceUnavailable": "Voz no disponible en este dispositivo"
 }

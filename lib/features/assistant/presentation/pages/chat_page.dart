@@ -9,6 +9,7 @@ import 'package:aplication_tesis/core/widgets/status_badge.dart';
 import 'package:aplication_tesis/features/assistant/domain/assistant_context.dart';
 import 'package:aplication_tesis/features/assistant/domain/assistant_message.dart';
 import 'package:aplication_tesis/features/assistant/presentation/providers/assistant_provider.dart';
+import 'package:aplication_tesis/features/assistant/presentation/providers/voice_controller.dart';
 import 'package:aplication_tesis/l10n/app_localizations.dart';
 
 class ChatPage extends StatefulWidget {
@@ -22,11 +23,46 @@ class _ChatPageState extends State<ChatPage> {
   final TextEditingController _textController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
+  /// Timestamp of the last assistant message that was auto-read.
+  DateTime? _lastSpokenTs;
+
+  // Stored references so dispose() can call them without touching context.
+  late final AssistantProvider _assistant;
+  late final VoiceController _voice;
+
+  @override
+  void initState() {
+    super.initState();
+    _assistant = context.read<AssistantProvider>();
+    _voice = context.read<VoiceController>();
+    _assistant.addListener(_onAssistant);
+  }
+
   @override
   void dispose() {
+    _assistant.removeListener(_onAssistant);
+    _voice.stopSpeaking();
     _textController.dispose();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  /// Called whenever AssistantProvider notifies — triggers auto-read when a
+  /// new assistant reply has completed.
+  void _onAssistant() {
+    if (!mounted) return;
+    if (_assistant.isThinking) return;
+    final msgs = _assistant.messages;
+    if (msgs.isEmpty) return;
+    final last = msgs.last;
+    if (last.role != AssistantRole.assistant) return;
+    if (last.text.isEmpty) return;
+    if (last.timestamp == _lastSpokenTs) return;
+    if (!_voice.autoSpeak) return;
+
+    final langTag = _languageTag(context);
+    _lastSpokenTs = last.timestamp;
+    _voice.speak(last.text, languageTag: langTag);
   }
 
   void _scrollToBottom() {
@@ -49,14 +85,41 @@ class _ChatPageState extends State<ChatPage> {
     _scrollToBottom();
   }
 
+  /// Returns `'es_ES'` or `'en_US'` for STT (underscore form).
+  static String _localeId(BuildContext context) {
+    final lang = Localizations.localeOf(context).languageCode;
+    return lang == 'es' ? 'es_ES' : 'en_US';
+  }
+
+  /// Returns `'es-ES'` or `'en-US'` for TTS (hyphen form).
+  static String _languageTag(BuildContext context) {
+    final lang = Localizations.localeOf(context).languageCode;
+    return lang == 'es' ? 'es-ES' : 'en-US';
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
+    final voice = context.watch<VoiceController>();
 
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n?.assistant ?? 'Asistente IA'),
+        actions: [
+          // Auto-read toggle: 🔊 / 🔇
+          IconButton(
+            icon: Icon(
+              voice.autoSpeak ? Icons.volume_up : Icons.volume_off,
+            ),
+            tooltip: voice.autoSpeak
+                ? (l10n?.voiceAutoReadOn ?? 'Lectura automática activada')
+                : (l10n?.voiceAutoReadOff ?? 'Lectura automática desactivada'),
+            onPressed: () {
+              context.read<VoiceController>().toggleAutoSpeak();
+            },
+          ),
+        ],
       ),
       body: Consumer<AssistantProvider>(
         builder: (context, provider, _) {
@@ -86,6 +149,15 @@ class _ChatPageState extends State<ChatPage> {
               if (ctx?.hasDetection == true)
                 _DetectionContextCard(ctx: ctx!, l10n: l10n, theme: theme),
 
+              // Partial-text hint shown while voice is listening
+              if (voice.isListening)
+                _ListeningHint(
+                  text: voice.partialText.isNotEmpty
+                      ? voice.partialText
+                      : (l10n?.voiceListening ?? 'Escuchando…'),
+                  theme: theme,
+                ),
+
               // Message list or empty state
               Expanded(
                 child: itemCount == 0
@@ -114,22 +186,74 @@ class _ChatPageState extends State<ChatPage> {
                             message: msg,
                             colorScheme: theme.colorScheme,
                             theme: theme,
+                            voice: voice,
+                            languageTag: _languageTag(context),
+                            l10n: l10n,
                           );
                         },
                       ),
               ),
 
-              // Bottom input row
+              // Bottom input row (with mic button)
               _InputRow(
                 controller: _textController,
                 hintText: l10n?.chatInputHint ?? 'Escribe tu pregunta…',
                 onSend: () {
                   _sendMessage(provider);
                 },
+                voice: voice,
+                localeId: _localeId(context),
+                languageTag: _languageTag(context),
+                l10n: l10n,
+                onFinalDictation: (text) {
+                  if (text.trim().isNotEmpty) {
+                    context.read<AssistantProvider>().send(text);
+                    _scrollToBottom();
+                  }
+                },
               ),
             ],
           );
         },
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Listening hint bar (shown while STT is active)
+// ---------------------------------------------------------------------------
+
+class _ListeningHint extends StatelessWidget {
+  const _ListeningHint({required this.text, required this.theme});
+
+  final String text;
+  final ThemeData theme;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = theme.colorScheme;
+    return Container(
+      width: double.infinity,
+      color: cs.secondaryContainer,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.sm,
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.mic, size: 16, color: cs.onSecondaryContainer),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              text,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: cs.onSecondaryContainer,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -356,7 +480,7 @@ class _DisclaimerBanner extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Message bubble
+// Message bubble (with optional play/stop button for assistant messages)
 // ---------------------------------------------------------------------------
 
 class _MessageBubble extends StatelessWidget {
@@ -364,11 +488,17 @@ class _MessageBubble extends StatelessWidget {
     required this.message,
     required this.colorScheme,
     required this.theme,
+    required this.voice,
+    required this.languageTag,
+    required this.l10n,
   });
 
   final AssistantMessage message;
   final ColorScheme colorScheme;
   final ThemeData theme;
+  final VoiceController voice;
+  final String languageTag;
+  final AppLocalizations? l10n;
 
   @override
   Widget build(BuildContext context) {
@@ -386,9 +516,11 @@ class _MessageBubble extends StatelessWidget {
         constraints: BoxConstraints(
           maxWidth: MediaQuery.of(context).size.width * 0.75,
         ),
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.lg,
-          vertical: AppSpacing.md,
+        padding: const EdgeInsets.only(
+          left: AppSpacing.lg,
+          right: AppSpacing.sm,
+          top: AppSpacing.md,
+          bottom: AppSpacing.sm,
         ),
         decoration: BoxDecoration(
           color: bgColor,
@@ -401,9 +533,53 @@ class _MessageBubble extends StatelessWidget {
                 Radius.circular(isUser ? AppRadius.sm : AppRadius.lg),
           ),
         ),
-        child: Text(
-          message.text,
-          style: theme.textTheme.bodyMedium?.copyWith(color: textColor),
+        child: Column(
+          crossAxisAlignment:
+              isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(
+                right: AppSpacing.sm,
+                bottom: AppSpacing.xs,
+              ),
+              child: Text(
+                message.text,
+                style: theme.textTheme.bodyMedium?.copyWith(color: textColor),
+              ),
+            ),
+            // Play / stop button — only for assistant messages
+            if (!isUser)
+              Align(
+                alignment: Alignment.centerRight,
+                child: SizedBox(
+                  width: 28,
+                  height: 28,
+                  child: IconButton(
+                    padding: EdgeInsets.zero,
+                    iconSize: 18,
+                    icon: Icon(
+                      voice.isSpeaking ? Icons.stop : Icons.volume_up,
+                      color: colorScheme.onSurface.withValues(alpha: 0.6),
+                    ),
+                    tooltip: voice.isSpeaking
+                        ? (l10n?.voiceStop ?? 'Detener')
+                        : (l10n?.voicePlay ?? 'Reproducir'),
+                    onPressed: message.text.isEmpty
+                        ? null
+                        : () {
+                            if (voice.isSpeaking) {
+                              context.read<VoiceController>().stopSpeaking();
+                            } else {
+                              context
+                                  .read<VoiceController>()
+                                  .speak(message.text, languageTag: languageTag);
+                            }
+                          },
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     );
@@ -465,7 +641,7 @@ class _ThinkingBubble extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Bottom input row
+// Bottom input row (text field + mic + send)
 // ---------------------------------------------------------------------------
 
 class _InputRow extends StatefulWidget {
@@ -473,11 +649,21 @@ class _InputRow extends StatefulWidget {
     required this.controller,
     required this.hintText,
     required this.onSend,
+    required this.voice,
+    required this.localeId,
+    required this.languageTag,
+    required this.l10n,
+    required this.onFinalDictation,
   });
 
   final TextEditingController controller;
   final String hintText;
   final VoidCallback onSend;
+  final VoiceController voice;
+  final String localeId;
+  final String languageTag;
+  final AppLocalizations? l10n;
+  final void Function(String text) onFinalDictation;
 
   @override
   State<_InputRow> createState() => _InputRowState();
@@ -509,6 +695,7 @@ class _InputRowState extends State<_InputRow> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
+    final voice = widget.voice;
 
     return SafeArea(
       child: Padding(
@@ -538,7 +725,29 @@ class _InputRowState extends State<_InputRow> {
               ),
             ),
             const SizedBox(width: AppSpacing.xs),
-            // Fase 2C: aquí irá el botón de micrófono 🎤
+
+            // Mic button — replaced from `// Fase 2C: micrófono` placeholder
+            if (voice.isListening)
+              IconButton(
+                icon: Icon(Icons.stop, color: cs.error),
+                tooltip: widget.l10n?.voiceStop ?? 'Detener',
+                onPressed: () {
+                  context.read<VoiceController>().stopDictation();
+                },
+              )
+            else
+              IconButton(
+                icon: const Icon(Icons.mic_none),
+                tooltip: widget.l10n?.voiceDictate ?? 'Dictar',
+                onPressed: () {
+                  context.read<VoiceController>().startDictation(
+                        onFinal: widget.onFinalDictation,
+                        localeId: widget.localeId,
+                      );
+                },
+              ),
+
+            // Send button
             IconButton(
               icon: Icon(
                 Icons.send,
