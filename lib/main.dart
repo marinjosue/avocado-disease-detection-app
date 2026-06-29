@@ -15,6 +15,10 @@ import 'features/onboarding/presentation/pages/onboarding_page.dart';
 import 'features/detection/presentation/providers/detection_provider.dart';
 import 'features/assistant/data/assistant_service_router.dart';
 import 'features/assistant/presentation/providers/assistant_provider.dart';
+import 'features/assistant/data/real_speech_to_text_service.dart';
+import 'features/assistant/data/real_tts_service.dart';
+import 'features/assistant/data/voice_prefs.dart';
+import 'features/assistant/presentation/providers/voice_controller.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -44,6 +48,13 @@ class AvoScanApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(
           create: (_) => AssistantProvider(AssistantServiceRouter()),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => VoiceController(
+            RealSpeechToTextService(),
+            RealTtsService(),
+            VoicePrefs(),
+          )..init(),
         ),
       ],
       child: Consumer2<LocaleProvider, ThemeProvider>(
