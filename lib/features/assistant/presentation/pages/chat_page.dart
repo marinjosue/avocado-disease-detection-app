@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:gpt_markdown/gpt_markdown.dart';
 import 'package:provider/provider.dart';
 
 import 'package:aplication_tesis/core/theme/app_tokens.dart';
@@ -11,6 +12,37 @@ import 'package:aplication_tesis/features/assistant/domain/assistant_message.dar
 import 'package:aplication_tesis/features/assistant/presentation/providers/assistant_provider.dart';
 import 'package:aplication_tesis/features/assistant/presentation/providers/voice_controller.dart';
 import 'package:aplication_tesis/l10n/app_localizations.dart';
+
+// ---------------------------------------------------------------------------
+// Markdown plain-text helper (used before TTS to strip formatting markers).
+// Exposed as a top-level function so unit tests can import it directly.
+// ---------------------------------------------------------------------------
+
+/// Strips common Markdown formatting from [md] and returns plain readable text
+/// suitable for text-to-speech playback.
+///
+/// Removes: bold/italic markers (`**`, `__`, `*`, `_`), inline backticks,
+/// heading markers (`# `, `## `, …), and list item prefixes (`- `, `* `,
+/// `1. `). Collapses any leftover blank lines.
+String markdownToPlainText(String md) {
+  var text = md;
+  // Remove bold (**text** or __text__)
+  text = text.replaceAll(RegExp(r'\*\*|__'), '');
+  // Remove italic (*text* or _text_) — single markers only
+  text = text.replaceAll(RegExp(r'(?<!\*)\*(?!\*)'), '');
+  text = text.replaceAll(RegExp(r'(?<!_)_(?!_)'), '');
+  // Remove inline code backticks
+  text = text.replaceAll('`', '');
+  // Remove heading markers at start of line
+  text = text.replaceAll(RegExp(r'^#{1,6}\s+', multiLine: true), '');
+  // Remove unordered list markers at start of line (- or *)
+  text = text.replaceAll(RegExp(r'^\s*[-*]\s+', multiLine: true), '');
+  // Remove ordered list markers at start of line (1. 2. etc.)
+  text = text.replaceAll(RegExp(r'^\s*\d+\.\s+', multiLine: true), '');
+  // Collapse multiple blank lines into one
+  text = text.replaceAll(RegExp(r'\n{3,}'), '\n\n');
+  return text.trim();
+}
 
 class ChatPage extends StatefulWidget {
   const ChatPage({super.key});
@@ -62,7 +94,7 @@ class _ChatPageState extends State<ChatPage> {
 
     final langTag = _languageTag(context);
     _lastSpokenTs = last.timestamp;
-    _voice.speak(last.text, languageTag: langTag);
+    _voice.speak(markdownToPlainText(last.text), languageTag: langTag);
   }
 
   void _scrollToBottom() {
@@ -543,10 +575,18 @@ class _MessageBubble extends StatelessWidget {
                 right: AppSpacing.sm,
                 bottom: AppSpacing.xs,
               ),
-              child: Text(
-                message.text,
-                style: theme.textTheme.bodyMedium?.copyWith(color: textColor),
-              ),
+              // Assistant bubbles render Markdown; user bubbles stay plain text.
+              child: isUser
+                  ? Text(
+                      message.text,
+                      style:
+                          theme.textTheme.bodyMedium?.copyWith(color: textColor),
+                    )
+                  : GptMarkdown(
+                      message.text,
+                      style:
+                          theme.textTheme.bodyMedium?.copyWith(color: textColor),
+                    ),
             ),
             // Play / stop button — only for assistant messages
             if (!isUser)
@@ -571,9 +611,10 @@ class _MessageBubble extends StatelessWidget {
                             if (voice.isSpeaking) {
                               context.read<VoiceController>().stopSpeaking();
                             } else {
-                              context
-                                  .read<VoiceController>()
-                                  .speak(message.text, languageTag: languageTag);
+                              context.read<VoiceController>().speak(
+                                    markdownToPlainText(message.text),
+                                    languageTag: languageTag,
+                                  );
                             }
                           },
                   ),

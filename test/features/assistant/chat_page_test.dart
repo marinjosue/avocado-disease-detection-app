@@ -246,5 +246,26 @@ void main() {
       // "Sobre" label is shown
       expect(find.textContaining('Sobre'), findsOneWidget);
     });
+
+    testWidgets('assistant bubble renders markdown — no raw ** shown',
+        (tester) async {
+      final provider = _makeProvider();
+      await provider.createGeneral();
+
+      await tester.pumpWidget(_buildTestApp(provider));
+      await tester.pumpAndSettle();
+
+      // Send a message to trigger a reply from the stub assistant
+      const userMessage = 'Pregunta de prueba markdown';
+      await tester.enterText(find.byType(TextField), userMessage);
+      await tester.pump();
+      await tester.tap(find.byIcon(Icons.send));
+
+      // Wait for the stub assistant reply (it has small delays)
+      await tester.pumpAndSettle(const Duration(seconds: 3));
+
+      // The assistant reply rendered via GptMarkdown must not show raw **
+      expect(find.textContaining('**'), findsNothing);
+    });
   });
 }

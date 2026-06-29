@@ -78,6 +78,7 @@ dependencies:
 
   flutter_localizations:
     sdk: flutter
+  gpt_markdown: ^1.1.7
 
 dev_dependencies:
   flutter_test:
