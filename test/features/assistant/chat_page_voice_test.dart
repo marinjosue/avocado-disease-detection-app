@@ -96,6 +96,19 @@ class _FakeTts implements TtsService {
 }
 
 // ---------------------------------------------------------------------------
+// Fake recorder (no real record plugin used)
+// ---------------------------------------------------------------------------
+
+class _FakeRecorder implements VoiceRecorderService {
+  @override
+  Future<bool> start() async => false;
+  @override
+  Future<String?> stop() async => null;
+  @override
+  Future<void> cancel() async {}
+}
+
+// ---------------------------------------------------------------------------
 // In-memory fake repository (same pattern as chat_page_test.dart)
 // ---------------------------------------------------------------------------
 
@@ -179,7 +192,7 @@ AssistantProvider _makeAssistantProvider() =>
     AssistantProvider(StubAssistantService(), repository: _FakeRepo());
 
 VoiceController _makeVoiceController(_FakeStt stt, _FakeTts tts) {
-  return VoiceController(stt, tts, VoicePrefs());
+  return VoiceController(stt, tts, VoicePrefs(), _FakeRecorder());
 }
 
 Widget _buildTestApp({

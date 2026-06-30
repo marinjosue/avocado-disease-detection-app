@@ -17,6 +17,7 @@ import 'features/assistant/data/assistant_service_router.dart';
 import 'features/assistant/presentation/providers/assistant_provider.dart';
 import 'features/assistant/data/real_speech_to_text_service.dart';
 import 'features/assistant/data/real_tts_service.dart';
+import 'features/assistant/data/real_voice_recorder_service.dart';
 import 'features/assistant/data/voice_prefs.dart';
 import 'features/assistant/presentation/providers/voice_controller.dart';
 
@@ -54,6 +55,7 @@ class AvoScanApp extends StatelessWidget {
             RealSpeechToTextService(),
             RealTtsService(),
             VoicePrefs(),
+            RealVoiceRecorderService(),
           )..init(),
         ),
       ],

@@ -237,9 +237,11 @@ class _ChatPageState extends State<ChatPage> {
                 localeId: _localeId(context),
                 languageTag: _languageTag(context),
                 l10n: l10n,
-                onFinalDictation: (text) {
+                onFinalDictation: (text, audioPath) {
                   if (text.trim().isNotEmpty) {
-                    context.read<AssistantProvider>().send(text);
+                    context
+                        .read<AssistantProvider>()
+                        .send(text, audioPath: audioPath);
                     _scrollToBottom();
                   }
                 },
@@ -704,7 +706,7 @@ class _InputRow extends StatefulWidget {
   final String localeId;
   final String languageTag;
   final AppLocalizations? l10n;
-  final void Function(String text) onFinalDictation;
+  final void Function(String text, String? audioPath) onFinalDictation;
 
   @override
   State<_InputRow> createState() => _InputRowState();
@@ -782,7 +784,8 @@ class _InputRowState extends State<_InputRow> {
                 tooltip: widget.l10n?.voiceDictate ?? 'Dictar',
                 onPressed: () {
                   context.read<VoiceController>().startDictation(
-                        onFinal: widget.onFinalDictation,
+                        onFinal: (text, audioPath) =>
+                            widget.onFinalDictation(text, audioPath),
                         localeId: widget.localeId,
                       );
                 },

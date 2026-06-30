@@ -46,3 +46,23 @@ abstract class TtsService {
   /// or ends / is cancelled / errors (`false`).
   set onSpeakingChanged(void Function(bool speaking) cb);
 }
+
+/// Audio recording service contract (used during dictation to capture a
+/// voice-note alongside the STT transcript).
+///
+/// Implementations are best-effort: callers must handle `start()` returning
+/// `false` and `stop()` returning `null` gracefully.
+abstract class VoiceRecorderService {
+  /// Starts recording audio.
+  ///
+  /// Returns `true` if recording actually started; `false` on permission
+  /// denial or any other error.
+  Future<bool> start();
+
+  /// Stops recording and returns the path of the saved audio file, or `null`
+  /// if the file could not be retrieved.
+  Future<String?> stop();
+
+  /// Cancels an in-progress recording without saving.
+  Future<void> cancel();
+}

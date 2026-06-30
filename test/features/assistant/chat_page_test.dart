@@ -48,6 +48,15 @@ class _FakeTts implements TtsService {
   set onSpeakingChanged(void Function(bool speaking) cb) {}
 }
 
+class _FakeRecorder implements VoiceRecorderService {
+  @override
+  Future<bool> start() async => false;
+  @override
+  Future<String?> stop() async => null;
+  @override
+  Future<void> cancel() async {}
+}
+
 // ---------------------------------------------------------------------------
 // In-memory fake repository — avoids real SQLite in widget tests
 // ---------------------------------------------------------------------------
@@ -129,7 +138,7 @@ class _FakeRepo extends ConversationRepository {
 // ---------------------------------------------------------------------------
 
 VoiceController _makeVoice() =>
-    VoiceController(_FakeStt(), _FakeTts(), VoicePrefs());
+    VoiceController(_FakeStt(), _FakeTts(), VoicePrefs(), _FakeRecorder());
 
 Widget _buildTestApp(AssistantProvider provider) {
   final voice = _makeVoice();
