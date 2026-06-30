@@ -173,5 +173,6 @@
   "voiceAutoReadOn": "Lectura automática activada",
   "voiceAutoReadOff": "Lectura automática desactivada",
   "micDenied": "Permiso de micrófono denegado",
-  "voiceUnavailable": "Voz no disponible en este dispositivo"
+  "voiceUnavailable": "Voz no disponible en este dispositivo",
+  "voiceNote": "Nota de voz"
 }

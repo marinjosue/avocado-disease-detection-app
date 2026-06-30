@@ -11,6 +11,7 @@ import 'package:aplication_tesis/features/assistant/domain/assistant_context.dar
 import 'package:aplication_tesis/features/assistant/domain/assistant_message.dart';
 import 'package:aplication_tesis/features/assistant/presentation/providers/assistant_provider.dart';
 import 'package:aplication_tesis/features/assistant/presentation/providers/voice_controller.dart';
+import 'package:aplication_tesis/features/assistant/presentation/widgets/voice_note_bubble.dart';
 import 'package:aplication_tesis/l10n/app_localizations.dart';
 
 // ---------------------------------------------------------------------------
@@ -577,13 +578,21 @@ class _MessageBubble extends StatelessWidget {
                 right: AppSpacing.sm,
                 bottom: AppSpacing.xs,
               ),
-              // Assistant bubbles render Markdown; user bubbles stay plain text.
+              // Assistant bubbles render Markdown; user bubbles with an audioPath
+              // render a voice-note player + transcript; plain user text stays
+              // as a simple Text widget.
               child: isUser
-                  ? Text(
-                      message.text,
-                      style:
-                          theme.textTheme.bodyMedium?.copyWith(color: textColor),
-                    )
+                  ? (message.audioPath != null
+                      ? VoiceNoteBubble(
+                          audioPath: message.audioPath!,
+                          transcript: message.text,
+                          foreground: textColor,
+                        )
+                      : Text(
+                          message.text,
+                          style: theme.textTheme.bodyMedium
+                              ?.copyWith(color: textColor),
+                        ))
                   : GptMarkdown(
                       message.text,
                       style:

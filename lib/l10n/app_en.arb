@@ -380,5 +380,9 @@
   "voiceUnavailable": "Voice not available on this device",
   "@voiceUnavailable": {
     "description": "Message shown when STT/TTS is not available on the device"
+  },
+  "voiceNote": "Voice note",
+  "@voiceNote": {
+    "description": "Tooltip / semantics label for the play button on a voice-note bubble"
   }
 }

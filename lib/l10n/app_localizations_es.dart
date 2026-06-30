@@ -551,4 +551,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get voiceUnavailable => 'Voz no disponible en este dispositivo';
+
+  @override
+  String get voiceNote => 'Nota de voz';
 }

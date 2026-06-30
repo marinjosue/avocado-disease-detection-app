@@ -1141,6 +1141,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Voice not available on this device'**
   String get voiceUnavailable;
+
+  /// Tooltip / semantics label for the play button on a voice-note bubble
+  ///
+  /// In en, this message translates to:
+  /// **'Voice note'**
+  String get voiceNote;
 }
 
 class _AppLocalizationsDelegate
