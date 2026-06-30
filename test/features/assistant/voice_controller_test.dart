@@ -291,47 +291,27 @@ void main() {
     });
 
     // -------------------------------------------------------------------------
-    // Recorder integration tests
+    // Recording is intentionally disabled DURING dictation (microphone
+    // contention): the recognizer must own the mic, so the recorder is never
+    // started and audioPath is always null.
     // -------------------------------------------------------------------------
 
-    test('calls recorder.start() when dictation begins', () async {
+    test('does NOT start the recorder during dictation (STT keeps the mic)',
+        () async {
       final stt = _FakeStt();
       final rec = _FakeRecorder(startResult: true, stopPath: '/tmp/test.m4a');
       final vc = _makeController(stt: stt, recorder: rec);
       await vc.init();
       await vc.startDictation(onFinal: (_, __) {});
-      expect(rec.startCallCount, 1);
+      await stt.emitFinal('hola');
+      expect(rec.startCallCount, 0);
+      expect(rec.stopCallCount, 0);
     });
 
-    test(
-        'when recorder.start() returns true and STT fires onFinal, '
-        'onFinal receives (text, stopPath)', () async {
+    test('onFinal always receives a null audioPath', () async {
       final stt = _FakeStt();
       final rec =
           _FakeRecorder(startResult: true, stopPath: '/voice/note.m4a');
-      final vc = _makeController(stt: stt, recorder: rec);
-      await vc.init();
-
-      String? receivedText;
-      String? receivedPath;
-      await vc.startDictation(
-        onFinal: (t, p) {
-          receivedText = t;
-          receivedPath = p;
-        },
-      );
-      await stt.emitFinal('hola mundo');
-
-      expect(receivedText, 'hola mundo');
-      expect(receivedPath, '/voice/note.m4a');
-      expect(rec.stopCallCount, 1);
-    });
-
-    test(
-        'when recorder.start() returns false, onFinal receives (text, null) '
-        'and recorder.stop() is NOT called', () async {
-      final stt = _FakeStt();
-      final rec = _FakeRecorder(startResult: false, stopPath: '/should/not/appear.m4a');
       final vc = _makeController(stt: stt, recorder: rec);
       await vc.init();
 
@@ -343,11 +323,10 @@ void main() {
           receivedPath = p;
         },
       );
-      await stt.emitFinal('texto de prueba');
+      await stt.emitFinal('hola mundo');
 
-      expect(receivedText, 'texto de prueba');
+      expect(receivedText, 'hola mundo');
       expect(receivedPath, isNull);
-      expect(rec.stopCallCount, 0); // stop must NOT be called
     });
   });
 
@@ -416,6 +395,34 @@ void main() {
       await vc.startDictation(onFinal: (_, __) {});
       await vc.stopDictation();
       expect(rec.cancelCallCount, 1);
+    });
+
+    test('sends the pending partial transcript via onFinal when stopped',
+        () async {
+      final stt = _FakeStt();
+      final vc = _makeController(stt: stt);
+      await vc.init();
+      String? received;
+      String? receivedPath = 'sentinel';
+      await vc.startDictation(onFinal: (t, p) {
+        received = t;
+        receivedPath = p;
+      });
+      stt.emitPartial('media pregunta');
+      await vc.stopDictation();
+      expect(received, 'media pregunta');
+      expect(receivedPath, isNull);
+    });
+
+    test('does not double-send if STT already delivered a final', () async {
+      final stt = _FakeStt();
+      final vc = _makeController(stt: stt);
+      await vc.init();
+      int calls = 0;
+      await vc.startDictation(onFinal: (_, __) => calls++);
+      await stt.emitFinal('listo');
+      await vc.stopDictation();
+      expect(calls, 1);
     });
   });
 

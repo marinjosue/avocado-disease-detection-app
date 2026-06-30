@@ -59,12 +59,22 @@ class VoiceController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Starts a dictation session that calls [onFinal] with the recognized text
-  /// and the path of the recorded audio file (or `null` if recording failed).
+  /// Holds the active dictation's [onFinal] callback until the session ends —
+  /// either because the recognizer delivers a final result, or the user taps
+  /// stop. Kept so a manual stop can still deliver the partial transcript.
+  void Function(String text, String? audioPath)? _onFinalCb;
+
+  /// Starts a dictation session that calls [onFinal] with the recognized text.
   ///
-  /// Any ongoing TTS is stopped first. Audio recording is best-effort: if the
-  /// recorder cannot start (e.g. no permission), [onFinal] still fires with
-  /// `audioPath == null` and the transcript is not lost.
+  /// Any ongoing TTS is stopped first.
+  ///
+  /// NOTE: we deliberately do NOT record audio while the recognizer is active.
+  /// On Android the system speech recognizer and an audio recorder contend for
+  /// the single microphone; recording starves the recognizer so it never
+  /// transcribes (the bug where it said "Listening…" forever and never sent).
+  /// Therefore [onFinal]'s `audioPath` is always `null` here — the transcript
+  /// (what the assistant needs) is the priority and is never lost. Saving the
+  /// dictation as playable audio is left to a separate, non-concurrent flow.
   ///
   /// [localeId] defaults to `'es_ES'`.
   Future<void> startDictation({
@@ -72,7 +82,8 @@ class VoiceController extends ChangeNotifier {
     String localeId = 'es_ES',
   }) async {
     await _tts.stop();
-    final recording = await _recorder.start();
+    _onFinalCb = onFinal;
+    _partialText = '';
     _isListening = true;
     notifyListeners();
     await _stt.startListening(
@@ -80,24 +91,38 @@ class VoiceController extends ChangeNotifier {
         _partialText = p;
         notifyListeners();
       },
-      onFinal: (t) async {
-        final path = recording ? await _recorder.stop() : null;
-        _isListening = false;
-        _partialText = '';
-        notifyListeners();
-        onFinal(t, path);
-      },
+      onFinal: (t) => _finishDictation(t),
       localeId: localeId,
     );
   }
 
-  /// Stops the active dictation session (cancels any in-progress recording).
-  Future<void> stopDictation() async {
-    await _recorder.cancel();
-    await _stt.stop();
+  /// Finalizes a dictation exactly once: delivers [text] (or the last partial
+  /// if [text] is empty) to the stored callback.
+  void _finishDictation(String text) {
+    final cb = _onFinalCb;
+    if (cb == null) return; // already finalized
+    _onFinalCb = null;
+    final finalText =
+        text.trim().isNotEmpty ? text.trim() : _partialText.trim();
     _isListening = false;
     _partialText = '';
     notifyListeners();
+    if (finalText.isNotEmpty) cb(finalText, null);
+  }
+
+  /// Stops the active dictation session. If the recognizer has not already
+  /// delivered a final result, the current partial transcript is sent so the
+  /// message is not lost when the user taps stop.
+  Future<void> stopDictation() async {
+    await _recorder.cancel();
+    await _stt.stop();
+    final cb = _onFinalCb;
+    _onFinalCb = null;
+    final pending = _partialText.trim();
+    _isListening = false;
+    _partialText = '';
+    notifyListeners();
+    if (cb != null && pending.isNotEmpty) cb(pending, null);
   }
 
   /// Speaks [text] via the TTS engine in [languageTag] (defaults to `'es-ES'`).
