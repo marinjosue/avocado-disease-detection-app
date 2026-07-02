@@ -174,5 +174,9 @@
   "voiceAutoReadOff": "Lectura automática desactivada",
   "micDenied": "Permiso de micrófono denegado",
   "voiceUnavailable": "Voz no disponible en este dispositivo",
-  "voiceNote": "Nota de voz"
+  "voiceNote": "Nota de voz",
+  "recordVoiceNote": "Grabar nota de voz",
+  "recording": "Grabando…",
+  "downloadingVoiceModel": "Descargando modelo de voz…",
+  "voiceModelError": "No se pudo descargar el modelo de voz"
 }

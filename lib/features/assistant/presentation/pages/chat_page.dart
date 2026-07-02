@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -63,6 +64,10 @@ class _ChatPageState extends State<ChatPage> {
   late final AssistantProvider _assistant;
   late final VoiceController _voice;
 
+  /// Elapsed seconds of the in-progress voice-note recording (mm:ss timer).
+  int _recordSeconds = 0;
+  Timer? _recordTimer;
+
   @override
   void initState() {
     super.initState();
@@ -73,6 +78,7 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   void dispose() {
+    _recordTimer?.cancel();
     _assistant.removeListener(_onAssistant);
     _voice.stopSpeaking();
     _textController.dispose();
@@ -116,6 +122,107 @@ class _ChatPageState extends State<ChatPage> {
     _textController.clear();
     provider.send(text);
     _scrollToBottom();
+  }
+
+  // ---------------------------------------------------------------------
+  // Voice notes — WhatsApp-style: record → (offline) transcribe → send as
+  // a playable message so it renders as a VoiceNoteBubble AND the assistant
+  // answers it. Separate from the 🎤 dictation flow above.
+  // ---------------------------------------------------------------------
+
+  /// Starts a voice-note recording. The first time this is used, the offline
+  /// transcription model has to be downloaded (~40 MB, needs internet once);
+  /// a non-dismissible progress dialog is shown while that happens.
+  Future<void> _startVoiceNote(AppLocalizations? l10n) async {
+    if (!_voice.voiceModelReady) {
+      final downloaded = await _downloadVoiceModel(l10n);
+      if (!downloaded) return;
+    }
+    if (!mounted) return;
+    final ok = await _voice.startVoiceNote();
+    if (!mounted) return;
+    if (!ok) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            l10n?.voiceUnavailable ?? 'Voz no disponible en este dispositivo',
+          ),
+        ),
+      );
+      return;
+    }
+    _recordTimer?.cancel();
+    setState(() => _recordSeconds = 0);
+    _recordTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (!mounted) return;
+      setState(() => _recordSeconds++);
+    });
+  }
+
+  /// Downloads (and loads) the offline voice-note transcription model behind
+  /// a non-dismissible progress dialog. Returns `true` on success; on
+  /// failure the dialog is closed, a SnackBar is shown, and `false` is
+  /// returned (no recording is started).
+  Future<bool> _downloadVoiceModel(AppLocalizations? l10n) async {
+    final progress = ValueNotifier<double>(0.0);
+    final navigator = Navigator.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => PopScope(
+        canPop: false,
+        child: AlertDialog(
+          title: Text(
+            l10n?.downloadingVoiceModel ?? 'Descargando modelo de voz…',
+          ),
+          content: ValueListenableBuilder<double>(
+            valueListenable: progress,
+            builder: (_, value, __) => LinearProgressIndicator(value: value),
+          ),
+        ),
+      ),
+    );
+
+    try {
+      await _voice.ensureVoiceModel(onProgress: (p) => progress.value = p);
+      if (!mounted) return false;
+      navigator.pop();
+      return true;
+    } catch (_) {
+      if (!mounted) return false;
+      navigator.pop();
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            l10n?.voiceModelError ?? 'No se pudo descargar el modelo de voz',
+          ),
+        ),
+      );
+      return false;
+    }
+  }
+
+  /// Stops the in-progress voice-note recording and, if it produced any
+  /// audio or transcript, sends it so it renders as a playable voice-note
+  /// bubble and the assistant answers it.
+  Future<void> _stopVoiceNote() async {
+    _recordTimer?.cancel();
+    _recordTimer = null;
+    final r = await _voice.stopVoiceNote();
+    if (!mounted) return;
+    if (r.text.trim().isNotEmpty || r.audioPath != null) {
+      _assistant.send(r.text.trim(), audioPath: r.audioPath);
+      _scrollToBottom();
+    }
+  }
+
+  /// Cancels the in-progress voice-note recording without sending anything.
+  Future<void> _cancelVoiceNote() async {
+    _recordTimer?.cancel();
+    _recordTimer = null;
+    await _voice.cancelVoiceNote();
   }
 
   /// Returns `'es_ES'` or `'en_US'` for STT (underscore form).
@@ -245,6 +352,16 @@ class _ChatPageState extends State<ChatPage> {
                         .send(text, audioPath: audioPath);
                     _scrollToBottom();
                   }
+                },
+                recordSeconds: _recordSeconds,
+                onStartVoiceNote: () {
+                  _startVoiceNote(l10n);
+                },
+                onStopVoiceNote: () {
+                  _stopVoiceNote();
+                },
+                onCancelVoiceNote: () {
+                  _cancelVoiceNote();
                 },
               ),
             ],
@@ -706,6 +823,10 @@ class _InputRow extends StatefulWidget {
     required this.languageTag,
     required this.l10n,
     required this.onFinalDictation,
+    required this.recordSeconds,
+    required this.onStartVoiceNote,
+    required this.onStopVoiceNote,
+    required this.onCancelVoiceNote,
   });
 
   final TextEditingController controller;
@@ -716,6 +837,12 @@ class _InputRow extends StatefulWidget {
   final String languageTag;
   final AppLocalizations? l10n;
   final void Function(String text, String? audioPath) onFinalDictation;
+
+  /// Elapsed seconds of the in-progress voice-note recording (mm:ss timer).
+  final int recordSeconds;
+  final VoidCallback onStartVoiceNote;
+  final VoidCallback onStopVoiceNote;
+  final VoidCallback onCancelVoiceNote;
 
   @override
   State<_InputRow> createState() => _InputRowState();
@@ -743,6 +870,13 @@ class _InputRowState extends State<_InputRow> {
     super.dispose();
   }
 
+  /// Formats [seconds] as `mm:ss`.
+  static String _formatSeconds(int seconds) {
+    final m = (seconds ~/ 60).toString().padLeft(2, '0');
+    final s = (seconds % 60).toString().padLeft(2, '0');
+    return '$m:$s';
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -757,63 +891,117 @@ class _InputRowState extends State<_InputRow> {
           AppSpacing.sm,
           AppSpacing.md,
         ),
-        child: Row(
-          children: [
-            Expanded(
-              child: TextField(
-                controller: widget.controller,
-                textCapitalization: TextCapitalization.sentences,
-                maxLines: null,
-                keyboardType: TextInputType.multiline,
-                textInputAction: TextInputAction.newline,
-                decoration: InputDecoration(
-                  hintText: widget.hintText,
-                  isDense: true,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.lg,
-                    vertical: AppSpacing.md,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: AppSpacing.xs),
-
-            // Mic button — replaced from `// Fase 2C: micrófono` placeholder
-            if (voice.isListening)
-              IconButton(
-                icon: Icon(Icons.stop, color: cs.error),
-                tooltip: widget.l10n?.voiceStop ?? 'Detener',
-                onPressed: () {
-                  context.read<VoiceController>().stopDictation();
-                },
-              )
-            else
-              IconButton(
-                icon: const Icon(Icons.mic_none),
-                tooltip: widget.l10n?.voiceDictate ?? 'Dictar',
-                onPressed: () {
-                  context.read<VoiceController>().startDictation(
-                        onFinal: (text, audioPath) =>
-                            widget.onFinalDictation(text, audioPath),
-                        localeId: widget.localeId,
-                      );
-                },
-              ),
-
-            // Send button
-            IconButton(
-              icon: Icon(
-                Icons.send,
-                color: _hasText
-                    ? cs.primary
-                    : cs.onSurface.withValues(alpha: 0.3),
-              ),
-              onPressed: _hasText ? widget.onSend : null,
-              tooltip: 'Enviar',
-            ),
-          ],
-        ),
+        child: voice.isRecordingNote
+            ? _buildRecordingRow(theme, cs)
+            : _buildDefaultRow(theme, cs, voice),
       ),
+    );
+  }
+
+  /// The normal input row: text field + dictation mic + voice-note record +
+  /// send.
+  Widget _buildDefaultRow(ThemeData theme, ColorScheme cs, VoiceController voice) {
+    return Row(
+      children: [
+        Expanded(
+          child: TextField(
+            controller: widget.controller,
+            textCapitalization: TextCapitalization.sentences,
+            maxLines: null,
+            keyboardType: TextInputType.multiline,
+            textInputAction: TextInputAction.newline,
+            decoration: InputDecoration(
+              hintText: widget.hintText,
+              isDense: true,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.lg,
+                vertical: AppSpacing.md,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: AppSpacing.xs),
+
+        // Mic button — replaced from `// Fase 2C: micrófono` placeholder
+        if (voice.isListening)
+          IconButton(
+            icon: Icon(Icons.stop, color: cs.error),
+            tooltip: widget.l10n?.voiceStop ?? 'Detener',
+            onPressed: () {
+              context.read<VoiceController>().stopDictation();
+            },
+          )
+        else
+          IconButton(
+            icon: const Icon(Icons.mic_none),
+            tooltip: widget.l10n?.voiceDictate ?? 'Dictar',
+            onPressed: () {
+              context.read<VoiceController>().startDictation(
+                    onFinal: (text, audioPath) =>
+                        widget.onFinalDictation(text, audioPath),
+                    localeId: widget.localeId,
+                  );
+            },
+          ),
+
+        // Voice-note button — separate WhatsApp-style flow: records audio
+        // AND transcribes it offline in a single capture. Disabled while
+        // dictation owns the microphone.
+        IconButton(
+          icon: const Icon(Icons.graphic_eq),
+          tooltip: widget.l10n?.recordVoiceNote ?? 'Grabar nota de voz',
+          onPressed: voice.isListening ? null : widget.onStartVoiceNote,
+        ),
+
+        // Send button
+        IconButton(
+          icon: Icon(
+            Icons.send,
+            color: _hasText ? cs.primary : cs.onSurface.withValues(alpha: 0.3),
+          ),
+          onPressed: _hasText ? widget.onSend : null,
+          tooltip: 'Enviar',
+        ),
+      ],
+    );
+  }
+
+  /// Recording indicator shown while a voice note is being captured: a red
+  /// dot, a "Grabando…" label, an elapsed mm:ss timer, an optional cancel
+  /// button, and a stop button.
+  Widget _buildRecordingRow(ThemeData theme, ColorScheme cs) {
+    final isEs = widget.l10n?.localeName == 'es';
+    return Row(
+      children: [
+        Container(
+          width: 10,
+          height: 10,
+          decoration: BoxDecoration(color: cs.error, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        Text(
+          widget.l10n?.recording ?? 'Grabando…',
+          style: theme.textTheme.bodyMedium,
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        Text(
+          _formatSeconds(widget.recordSeconds),
+          style: theme.textTheme.bodyMedium?.copyWith(
+            fontFeatures: const [FontFeature.tabularFigures()],
+          ),
+        ),
+        const Spacer(),
+        IconButton(
+          icon: Icon(Icons.delete_outline, color: cs.onSurface.withValues(alpha: 0.6)),
+          tooltip: isEs ? 'Cancelar' : 'Cancel',
+          onPressed: widget.onCancelVoiceNote,
+        ),
+        IconButton(
+          icon: Icon(Icons.stop_circle, color: cs.primary),
+          tooltip: widget.l10n?.voiceStop ?? 'Detener',
+          onPressed: widget.onStopVoiceNote,
+        ),
+      ],
     );
   }
 }

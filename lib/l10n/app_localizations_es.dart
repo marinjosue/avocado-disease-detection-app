@@ -554,4 +554,16 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get voiceNote => 'Nota de voz';
+
+  @override
+  String get recordVoiceNote => 'Grabar nota de voz';
+
+  @override
+  String get recording => 'Grabando…';
+
+  @override
+  String get downloadingVoiceModel => 'Descargando modelo de voz…';
+
+  @override
+  String get voiceModelError => 'No se pudo descargar el modelo de voz';
 }

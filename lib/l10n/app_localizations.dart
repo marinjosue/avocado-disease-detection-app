@@ -1147,6 +1147,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Voice note'**
   String get voiceNote;
+
+  /// Tooltip for the button that starts recording a WhatsApp-style voice note
+  ///
+  /// In en, this message translates to:
+  /// **'Record voice note'**
+  String get recordVoiceNote;
+
+  /// Label shown while a voice note is being recorded
+  ///
+  /// In en, this message translates to:
+  /// **'Recording…'**
+  String get recording;
+
+  /// Title of the progress dialog shown while the offline voice-note model downloads
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading voice model…'**
+  String get downloadingVoiceModel;
+
+  /// SnackBar shown when the offline voice-note model fails to download
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t download the voice model'**
+  String get voiceModelError;
 }
 
 class _AppLocalizationsDelegate

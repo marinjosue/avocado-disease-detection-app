@@ -552,4 +552,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get voiceNote => 'Voice note';
+
+  @override
+  String get recordVoiceNote => 'Record voice note';
+
+  @override
+  String get recording => 'Recording…';
+
+  @override
+  String get downloadingVoiceModel => 'Downloading voice model…';
+
+  @override
+  String get voiceModelError => 'Couldn\'t download the voice model';
 }

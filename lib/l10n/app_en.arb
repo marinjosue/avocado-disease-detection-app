@@ -384,5 +384,21 @@
   "voiceNote": "Voice note",
   "@voiceNote": {
     "description": "Tooltip / semantics label for the play button on a voice-note bubble"
+  },
+  "recordVoiceNote": "Record voice note",
+  "@recordVoiceNote": {
+    "description": "Tooltip for the button that starts recording a WhatsApp-style voice note"
+  },
+  "recording": "Recording…",
+  "@recording": {
+    "description": "Label shown while a voice note is being recorded"
+  },
+  "downloadingVoiceModel": "Downloading voice model…",
+  "@downloadingVoiceModel": {
+    "description": "Title of the progress dialog shown while the offline voice-note model downloads"
+  },
+  "voiceModelError": "Couldn't download the voice model",
+  "@voiceModelError": {
+    "description": "SnackBar shown when the offline voice-note model fails to download"
   }
 }
