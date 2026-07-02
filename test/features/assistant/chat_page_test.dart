@@ -57,6 +57,20 @@ class _FakeRecorder implements VoiceRecorderService {
   Future<void> cancel() async {}
 }
 
+class _FakeNote implements VoiceNoteService {
+  @override
+  bool get isReady => true;
+  @override
+  Future<void> ensureModel({void Function(double progress)? onProgress}) async {}
+  @override
+  Future<bool> start() async => false;
+  @override
+  Future<({String? audioPath, String text})> stop() async =>
+      (audioPath: null, text: '');
+  @override
+  Future<void> cancel() async {}
+}
+
 // ---------------------------------------------------------------------------
 // In-memory fake repository — avoids real SQLite in widget tests
 // ---------------------------------------------------------------------------
@@ -137,8 +151,13 @@ class _FakeRepo extends ConversationRepository {
 // Helper: build test app with a pre-seeded provider + fake VoiceController
 // ---------------------------------------------------------------------------
 
-VoiceController _makeVoice() =>
-    VoiceController(_FakeStt(), _FakeTts(), VoicePrefs(), _FakeRecorder());
+VoiceController _makeVoice() => VoiceController(
+      _FakeStt(),
+      _FakeTts(),
+      VoicePrefs(),
+      _FakeRecorder(),
+      _FakeNote(),
+    );
 
 Widget _buildTestApp(AssistantProvider provider) {
   final voice = _makeVoice();

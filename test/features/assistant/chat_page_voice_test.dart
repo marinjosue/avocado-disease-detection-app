@@ -109,6 +109,24 @@ class _FakeRecorder implements VoiceRecorderService {
 }
 
 // ---------------------------------------------------------------------------
+// Fake voice-note service (no real record/vosk plugins used)
+// ---------------------------------------------------------------------------
+
+class _FakeNote implements VoiceNoteService {
+  @override
+  bool get isReady => true;
+  @override
+  Future<void> ensureModel({void Function(double progress)? onProgress}) async {}
+  @override
+  Future<bool> start() async => false;
+  @override
+  Future<({String? audioPath, String text})> stop() async =>
+      (audioPath: null, text: '');
+  @override
+  Future<void> cancel() async {}
+}
+
+// ---------------------------------------------------------------------------
 // In-memory fake repository (same pattern as chat_page_test.dart)
 // ---------------------------------------------------------------------------
 
@@ -192,7 +210,13 @@ AssistantProvider _makeAssistantProvider() =>
     AssistantProvider(StubAssistantService(), repository: _FakeRepo());
 
 VoiceController _makeVoiceController(_FakeStt stt, _FakeTts tts) {
-  return VoiceController(stt, tts, VoicePrefs(), _FakeRecorder());
+  return VoiceController(
+    stt,
+    tts,
+    VoicePrefs(),
+    _FakeRecorder(),
+    _FakeNote(),
+  );
 }
 
 Widget _buildTestApp({

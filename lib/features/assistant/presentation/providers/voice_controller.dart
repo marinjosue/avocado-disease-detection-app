@@ -3,20 +3,28 @@ import 'package:flutter/foundation.dart';
 import '../../domain/voice_services.dart';
 import '../../data/voice_prefs.dart';
 
-/// Composes [SpeechToTextService], [TtsService], [VoicePrefs], and
-/// [VoiceRecorderService] into a single [ChangeNotifier] that the UI listens
-/// to for all voice-related state.
+/// Composes [SpeechToTextService], [TtsService], [VoicePrefs],
+/// [VoiceRecorderService], and [VoiceNoteService] into a single
+/// [ChangeNotifier] that the UI listens to for all voice-related state.
 class VoiceController extends ChangeNotifier {
   final SpeechToTextService _stt;
   final TtsService _tts;
   final VoicePrefs _prefs;
   final VoiceRecorderService _recorder;
+  final VoiceNoteService _note;
 
-  VoiceController(this._stt, this._tts, this._prefs, this._recorder);
+  VoiceController(
+    this._stt,
+    this._tts,
+    this._prefs,
+    this._recorder,
+    this._note,
+  );
 
   bool _isListening = false;
   bool _isSpeaking = false;
   bool _autoSpeak = true;
+  bool _isRecordingNote = false;
   String _partialText = '';
 
   /// Whether the underlying STT engine is available (initialized).
@@ -33,6 +41,19 @@ class VoiceController extends ChangeNotifier {
 
   /// In-progress partial transcription during an active dictation session.
   String get partialText => _partialText;
+
+  /// Whether the offline voice-note transcription model is downloaded/ready.
+  bool get voiceModelReady => _note.isReady;
+
+  /// Whether a voice-note recording (audio + offline transcription) is
+  /// currently in progress. Separate from [isListening] (dictation).
+  bool get isRecordingNote => _isRecordingNote;
+
+  /// Downloads (if needed) and loads the offline voice-note transcription
+  /// model. [onProgress] receives values in `[0.0, 1.0]`.
+  Future<void> ensureVoiceModel({void Function(double progress)? onProgress}) {
+    return _note.ensureModel(onProgress: onProgress);
+  }
 
   /// Initializes STT + TTS, loads persisted prefs.
   ///
@@ -133,5 +154,39 @@ class VoiceController extends ChangeNotifier {
   /// Stops any ongoing TTS speech.
   Future<void> stopSpeaking() async {
     await _tts.stop();
+  }
+
+  // ---------------------------------------------------------------------
+  // Voice notes — a SEPARATE flow from dictation. A single microphone
+  // capture is split into a playable .wav file and an offline transcript
+  // (see [VoiceNoteService]); the system speech recognizer is never used
+  // here, so there is no mic contention with [startDictation].
+  // ---------------------------------------------------------------------
+
+  /// Starts recording a voice note. Any ongoing TTS is stopped first.
+  ///
+  /// Returns `true` if recording actually started.
+  Future<bool> startVoiceNote() async {
+    await _tts.stop();
+    final ok = await _note.start();
+    _isRecordingNote = ok;
+    notifyListeners();
+    return ok;
+  }
+
+  /// Stops the active voice-note recording and returns the saved audio path
+  /// (or `null`) plus the transcribed text (empty string on failure).
+  Future<({String? audioPath, String text})> stopVoiceNote() async {
+    final r = await _note.stop();
+    _isRecordingNote = false;
+    notifyListeners();
+    return r;
+  }
+
+  /// Cancels an in-progress voice-note recording without saving.
+  Future<void> cancelVoiceNote() async {
+    await _note.cancel();
+    _isRecordingNote = false;
+    notifyListeners();
   }
 }

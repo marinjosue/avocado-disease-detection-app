@@ -132,6 +132,53 @@ class _FakeRecorder implements VoiceRecorderService {
   }
 }
 
+class _FakeNote implements VoiceNoteService {
+  /// Controls [isReady].
+  bool ready;
+
+  /// Controls what [start] returns.
+  bool startResult;
+
+  /// Controls what [stop] returns.
+  ({String? audioPath, String text}) stopResult;
+
+  int ensureModelCallCount = 0;
+  int startCallCount = 0;
+  int stopCallCount = 0;
+  int cancelCallCount = 0;
+
+  _FakeNote({
+    this.ready = true,
+    this.startResult = true,
+    this.stopResult = (audioPath: '/voice_notes/note.wav', text: 'hola'),
+  });
+
+  @override
+  bool get isReady => ready;
+
+  @override
+  Future<void> ensureModel({void Function(double progress)? onProgress}) async {
+    ensureModelCallCount++;
+  }
+
+  @override
+  Future<bool> start() async {
+    startCallCount++;
+    return startResult;
+  }
+
+  @override
+  Future<({String? audioPath, String text})> stop() async {
+    stopCallCount++;
+    return stopResult;
+  }
+
+  @override
+  Future<void> cancel() async {
+    cancelCallCount++;
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -141,12 +188,14 @@ VoiceController _makeController({
   _FakeTts? tts,
   VoicePrefs? prefs,
   _FakeRecorder? recorder,
+  _FakeNote? note,
 }) {
   return VoiceController(
     stt ?? _FakeStt(),
     tts ?? _FakeTts(),
     prefs ?? VoicePrefs(),
     recorder ?? _FakeRecorder(),
+    note ?? _FakeNote(),
   );
 }
 
@@ -433,6 +482,113 @@ void main() {
       await vc.init();
       await vc.stopSpeaking();
       expect(tts.stopCallCount, greaterThan(0));
+    });
+  });
+
+  // ---------------------------------------------------------------------
+  // Voice notes — separate flow from dictation, backed by VoiceNoteService.
+  // ---------------------------------------------------------------------
+
+  group('VoiceController.voiceModelReady / ensureVoiceModel()', () {
+    test('voiceModelReady reflects note.isReady', () async {
+      final note = _FakeNote(ready: false);
+      final vc = _makeController(note: note);
+      await vc.init();
+      expect(vc.voiceModelReady, isFalse);
+    });
+
+    test('ensureVoiceModel() delegates to note.ensureModel()', () async {
+      final note = _FakeNote();
+      final vc = _makeController(note: note);
+      await vc.init();
+      await vc.ensureVoiceModel();
+      expect(note.ensureModelCallCount, 1);
+    });
+  });
+
+  group('VoiceController.startVoiceNote()', () {
+    test('stops TTS first before starting', () async {
+      final tts = _FakeTts();
+      final note = _FakeNote();
+      final vc = _makeController(tts: tts, note: note);
+      await vc.init();
+      await vc.startVoiceNote();
+      expect(tts.stopCallCount, greaterThan(0));
+    });
+
+    test('sets isRecordingNote = true when note.start() succeeds', () async {
+      final note = _FakeNote(startResult: true);
+      final vc = _makeController(note: note);
+      await vc.init();
+      final ok = await vc.startVoiceNote();
+      expect(ok, isTrue);
+      expect(vc.isRecordingNote, isTrue);
+    });
+
+    test('isRecordingNote stays false when note.start() fails', () async {
+      final note = _FakeNote(startResult: false);
+      final vc = _makeController(note: note);
+      await vc.init();
+      final ok = await vc.startVoiceNote();
+      expect(ok, isFalse);
+      expect(vc.isRecordingNote, isFalse);
+    });
+
+    test('notifies listeners', () async {
+      final note = _FakeNote();
+      final vc = _makeController(note: note);
+      await vc.init();
+      int notifyCount = 0;
+      vc.addListener(() => notifyCount++);
+      await vc.startVoiceNote();
+      expect(notifyCount, greaterThan(0));
+    });
+  });
+
+  group('VoiceController.stopVoiceNote()', () {
+    test('returns the fake note service result', () async {
+      final note = _FakeNote(
+        stopResult: (audioPath: '/voice_notes/123.wav', text: 'aguacate sano'),
+      );
+      final vc = _makeController(note: note);
+      await vc.init();
+      await vc.startVoiceNote();
+      final r = await vc.stopVoiceNote();
+      expect(r.audioPath, '/voice_notes/123.wav');
+      expect(r.text, 'aguacate sano');
+    });
+
+    test('clears isRecordingNote', () async {
+      final note = _FakeNote();
+      final vc = _makeController(note: note);
+      await vc.init();
+      await vc.startVoiceNote();
+      expect(vc.isRecordingNote, isTrue);
+      await vc.stopVoiceNote();
+      expect(vc.isRecordingNote, isFalse);
+    });
+
+    test('notifies listeners', () async {
+      final note = _FakeNote();
+      final vc = _makeController(note: note);
+      await vc.init();
+      await vc.startVoiceNote();
+      int notifyCount = 0;
+      vc.addListener(() => notifyCount++);
+      await vc.stopVoiceNote();
+      expect(notifyCount, greaterThan(0));
+    });
+  });
+
+  group('VoiceController.cancelVoiceNote()', () {
+    test('delegates to note.cancel() and clears isRecordingNote', () async {
+      final note = _FakeNote();
+      final vc = _makeController(note: note);
+      await vc.init();
+      await vc.startVoiceNote();
+      await vc.cancelVoiceNote();
+      expect(note.cancelCallCount, 1);
+      expect(vc.isRecordingNote, isFalse);
     });
   });
 }

@@ -66,3 +66,39 @@ abstract class VoiceRecorderService {
   /// Cancels an in-progress recording without saving.
   Future<void> cancel();
 }
+
+/// Offline voice-note service contract.
+///
+/// Captures the microphone ONCE as a raw PCM stream and fans it out to (a)
+/// a playable `.wav` file and (b) an offline transcriber, so recording a
+/// voice note and transcribing it never contend for the microphone.
+///
+/// This is a separate flow from dictation ([SpeechToTextService]): dictation
+/// stays STT-only (system recognizer), voice notes stay record+transcribe.
+abstract class VoiceNoteService {
+  /// Whether the offline transcription model has been downloaded/loaded.
+  bool get isReady;
+
+  /// Downloads (if needed) and loads the offline transcription model.
+  ///
+  /// [onProgress] receives values in `[0.0, 1.0]`.
+  Future<void> ensureModel({void Function(double progress)? onProgress});
+
+  /// Starts a single-capture recording: begins streaming PCM audio to both
+  /// the WAV buffer and the transcriber.
+  ///
+  /// Returns `true` if recording actually started; `false` on permission
+  /// denial, a not-ready model, or any other error.
+  Future<bool> start();
+
+  /// Stops recording, finalizes the transcript, and writes the accumulated
+  /// PCM audio to a `.wav` file.
+  ///
+  /// Returns the saved audio path (or `null` if no audio was captured) and
+  /// the transcribed text (empty string if transcription failed).
+  Future<({String? audioPath, String text})> stop();
+
+  /// Cancels an in-progress recording without saving audio or finalizing a
+  /// transcript.
+  Future<void> cancel();
+}
