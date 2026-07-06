@@ -24,9 +24,9 @@ android {
         applicationId = "com.example.aplication_tesis"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        // minSdk bumped from flutter.minSdkVersion (24) to 30: required by the
-        // vosk_flutter_2 plugin's native Android module (offline speech-to-text).
-        minSdk = 30
+        // flutter.minSdkVersion (24) satisfies both sherpa_onnx (minSdk 21) and
+        // flutter_gemma (minSdk 24); no override needed after removing vosk_flutter_2.
+        minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
