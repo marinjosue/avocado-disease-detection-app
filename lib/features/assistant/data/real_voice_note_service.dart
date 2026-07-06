@@ -7,7 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
 
 import '../domain/voice_services.dart';
-import 'vosk_transcriber.dart';
+import 'sherpa_transcriber.dart';
 
 /// Builds a canonical 44-byte WAV (RIFF/PCM) header followed by [pcm] data.
 ///
@@ -66,10 +66,11 @@ Uint8List _uint16le(int value) {
 }
 
 /// Concrete [VoiceNoteService] backed by `record`'s PCM streaming API and
-/// [VoskTranscriber].
+/// [SherpaTranscriber] (sherpa-onnx, offline Whisper — 16 KB page-aligned for
+/// Google Play, unlike the previous Vosk engine).
 ///
 /// Captures the microphone ONCE: each PCM chunk is appended to an in-memory
-/// buffer (later written as a `.wav` file) AND fed to the Vosk recognizer —
+/// buffer (later written as a `.wav` file) AND fed to the recognizer —
 /// a single mic consumer, so recording and transcription never contend for
 /// the microphone.
 ///
@@ -77,11 +78,11 @@ Uint8List _uint16le(int value) {
 /// and returns a safe fallback so callers never need to guard against
 /// failures here.
 class RealVoiceNoteService implements VoiceNoteService {
-  RealVoiceNoteService({VoskTranscriber? transcriber, AudioRecorder? recorder})
-      : _transcriber = transcriber ?? VoskTranscriber(),
+  RealVoiceNoteService({SherpaTranscriber? transcriber, AudioRecorder? recorder})
+      : _transcriber = transcriber ?? SherpaTranscriber(),
         _rec = recorder ?? AudioRecorder();
 
-  final VoskTranscriber _transcriber;
+  final SherpaTranscriber _transcriber;
   final AudioRecorder _rec;
 
   StreamSubscription<Uint8List>? _sub;
