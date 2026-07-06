@@ -84,6 +84,8 @@ dependencies:
     sdk: flutter
   gpt_markdown: ^1.1.7
   vosk_flutter_2: ^1.0.5
+  sherpa_onnx: ^1.13.3
+  archive: ^3.6.1
 
 dev_dependencies:
   flutter_test:
