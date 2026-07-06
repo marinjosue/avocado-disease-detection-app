@@ -39,6 +39,21 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
+
+    // Qualcomm QNN / NPU acceleration libraries (libQnn*.so,
+    // libLiteRtDispatch_Qualcomm.so) ship prebuilt at 4 KB page alignment and
+    // would FAIL Google Play's 16 KB page-size requirement. We do not use the
+    // Qualcomm NPU dispatch path — on-device Gemma runs on GPU (OpenCL) / CPU
+    // via LiteRT, which falls back gracefully when these are absent. Excluding
+    // them keeps every packaged .so 16 KB-aligned.
+    packaging {
+        jniLibs {
+            excludes += listOf(
+                "**/libQnn*.so",
+                "**/libLiteRtDispatch_Qualcomm.so",
+            )
+        }
+    }
 }
 
 flutter {
