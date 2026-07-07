@@ -14,7 +14,9 @@ import '../../data/services/detection_service.dart';
 import '../providers/detection_provider.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
+import '../../../assistant/data/ai_access_prefs.dart';
 import '../../../assistant/domain/assistant_context.dart';
+import '../../../assistant/presentation/pages/ai_unlock_page.dart';
 import '../../../assistant/presentation/pages/chat_page.dart';
 import '../../../assistant/presentation/providers/assistant_provider.dart';
 
@@ -379,12 +381,21 @@ class _CameraPageState extends State<CameraPage> {
               icon: Icons.smart_toy,
               label: l10n.askAI,
               onPressed: () async {
+                final nav = Navigator.of(context);
+                final provider = context.read<AssistantProvider>();
+                final unlocked = await AiAccessPrefs().isUnlocked();
+                if (!unlocked) {
+                  nav.push(
+                    MaterialPageRoute(
+                      builder: (_) => const AiUnlockPage(),
+                    ),
+                  );
+                  return;
+                }
                 final ctx = AssistantContext.fromDetection(
                   result,
                   isSpanish: l10n.localeName == 'es',
                 );
-                final provider = context.read<AssistantProvider>();
-                final nav = Navigator.of(context);
                 await provider.openOrCreateForDetection(ctx);
                 nav.push(
                   MaterialPageRoute(

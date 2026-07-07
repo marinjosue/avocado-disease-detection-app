@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../core/providers/connectivity_provider.dart';
 import '../../../../core/theme/disease_colors.dart';
+import '../../../assistant/presentation/pages/ai_gate.dart';
 import '../../../assistant/presentation/pages/conversations_list_page.dart';
 import '../../../dashboard/presentation/pages/dashboard_page.dart';
 import '../../../calculator/presentation/pages/calculator_page.dart';
@@ -47,7 +48,7 @@ class _MainPageState extends State<MainPage> {
     final pages = [
       const DashboardPage(),
       const CalculatorPage(),
-      const ConversationsListPage(),
+      const AiGate(child: ConversationsListPage()),
       const CameraPage(),
       const HistoryListPage(),
       const SettingsPage(),

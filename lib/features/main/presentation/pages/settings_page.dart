@@ -7,7 +7,7 @@ import '../../../../core/widgets/section_header.dart';
 import '../../../../core/widgets/theme_mode_selector.dart';
 import '../../../../core/services/onboarding_service.dart';
 import '../../../../core/theme/app_tokens.dart';
-import '../../../assistant/presentation/pages/model_setup_page.dart';
+import '../../../assistant/presentation/pages/ai_unlock_page.dart';
 import '../../../onboarding/presentation/pages/onboarding_page.dart';
 
 class SettingsPage extends StatelessWidget {
@@ -60,7 +60,7 @@ class SettingsPage extends StatelessWidget {
               title: Text(l10n.aiModelTile, style: theme.textTheme.titleMedium),
               trailing: Icon(Icons.chevron_right, color: cs.onSurfaceVariant),
               onTap: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const ModelSetupPage()),
+                MaterialPageRoute(builder: (_) => const AiUnlockPage()),
               ),
             ),
           ),

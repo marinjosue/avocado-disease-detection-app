@@ -9,7 +9,9 @@ import '../../../../core/widgets/confidence_bar.dart';
 import '../../../../core/widgets/detection_tile.dart';
 import '../../../../core/widgets/section_header.dart';
 import '../providers/detection_provider.dart';
+import '../../../assistant/data/ai_access_prefs.dart';
 import '../../../assistant/domain/assistant_context.dart';
+import '../../../assistant/presentation/pages/ai_unlock_page.dart';
 import '../../../assistant/presentation/pages/chat_page.dart';
 import '../../../assistant/presentation/providers/assistant_provider.dart';
 
@@ -167,13 +169,22 @@ class HistoryListPage extends StatelessWidget {
                       icon: const Icon(Icons.smart_toy),
                       label: Text(l10n.askAI),
                       onPressed: () async {
+                        final provider = context.read<AssistantProvider>();
+                        final nav = Navigator.of(context);
+                        Navigator.pop(context);
+                        final unlocked = await AiAccessPrefs().isUnlocked();
+                        if (!unlocked) {
+                          nav.push(
+                            MaterialPageRoute(
+                              builder: (_) => const AiUnlockPage(),
+                            ),
+                          );
+                          return;
+                        }
                         final ctx = AssistantContext.fromDetection(
                           detection,
                           isSpanish: l10n.localeName == 'es',
                         );
-                        final provider = context.read<AssistantProvider>();
-                        final nav = Navigator.of(context);
-                        Navigator.pop(context);
                         await provider.openOrCreateForDetection(ctx);
                         nav.push(
                           MaterialPageRoute(
