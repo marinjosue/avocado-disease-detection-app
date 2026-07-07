@@ -566,4 +566,28 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get voiceModelError => 'No se pudo descargar el modelo de voz';
+
+  @override
+  String get exclusiveAccess => 'Acceso exclusivo';
+
+  @override
+  String get accessCodeHint => 'Código de acceso';
+
+  @override
+  String get unlock => 'Desbloquear';
+
+  @override
+  String get wrongCode => 'Código incorrecto';
+
+  @override
+  String get downloadingAiModel => 'Descargando modelo de IA…';
+
+  @override
+  String get aiReady => 'IA lista';
+
+  @override
+  String get continueLabel => 'Continuar';
+
+  @override
+  String get retry => 'Reintentar';
 }

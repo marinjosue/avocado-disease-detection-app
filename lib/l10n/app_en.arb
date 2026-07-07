@@ -400,5 +400,37 @@
   "voiceModelError": "Couldn't download the voice model",
   "@voiceModelError": {
     "description": "SnackBar shown when the offline voice-note model fails to download"
+  },
+  "exclusiveAccess": "Exclusive access",
+  "@exclusiveAccess": {
+    "description": "Title of the access-code gate page that unlocks the on-device AI"
+  },
+  "accessCodeHint": "Access code",
+  "@accessCodeHint": {
+    "description": "Hint text for the access code input field"
+  },
+  "unlock": "Unlock",
+  "@unlock": {
+    "description": "Button label to submit the access code"
+  },
+  "wrongCode": "Incorrect code",
+  "@wrongCode": {
+    "description": "Error shown when the entered access code does not match"
+  },
+  "downloadingAiModel": "Downloading AI model…",
+  "@downloadingAiModel": {
+    "description": "Label shown while the Gemma text model downloads"
+  },
+  "aiReady": "AI ready",
+  "@aiReady": {
+    "description": "Success message shown once both AI models finished downloading"
+  },
+  "continueLabel": "Continue",
+  "@continueLabel": {
+    "description": "Button label to proceed after the AI models are ready"
+  },
+  "retry": "Retry",
+  "@retry": {
+    "description": "Button label to retry a failed model download"
   }
 }

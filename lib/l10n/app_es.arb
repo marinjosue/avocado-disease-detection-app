@@ -178,5 +178,13 @@
   "recordVoiceNote": "Grabar nota de voz",
   "recording": "Grabando…",
   "downloadingVoiceModel": "Descargando modelo de voz…",
-  "voiceModelError": "No se pudo descargar el modelo de voz"
+  "voiceModelError": "No se pudo descargar el modelo de voz",
+  "exclusiveAccess": "Acceso exclusivo",
+  "accessCodeHint": "Código de acceso",
+  "unlock": "Desbloquear",
+  "wrongCode": "Código incorrecto",
+  "downloadingAiModel": "Descargando modelo de IA…",
+  "aiReady": "IA lista",
+  "continueLabel": "Continuar",
+  "retry": "Reintentar"
 }

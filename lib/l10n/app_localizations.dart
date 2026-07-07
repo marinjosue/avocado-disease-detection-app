@@ -1171,6 +1171,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Couldn\'t download the voice model'**
   String get voiceModelError;
+
+  /// Title of the access-code gate page that unlocks the on-device AI
+  ///
+  /// In en, this message translates to:
+  /// **'Exclusive access'**
+  String get exclusiveAccess;
+
+  /// Hint text for the access code input field
+  ///
+  /// In en, this message translates to:
+  /// **'Access code'**
+  String get accessCodeHint;
+
+  /// Button label to submit the access code
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock'**
+  String get unlock;
+
+  /// Error shown when the entered access code does not match
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect code'**
+  String get wrongCode;
+
+  /// Label shown while the Gemma text model downloads
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading AI model…'**
+  String get downloadingAiModel;
+
+  /// Success message shown once both AI models finished downloading
+  ///
+  /// In en, this message translates to:
+  /// **'AI ready'**
+  String get aiReady;
+
+  /// Button label to proceed after the AI models are ready
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get continueLabel;
+
+  /// Button label to retry a failed model download
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retry;
 }
 
 class _AppLocalizationsDelegate
