@@ -5,12 +5,10 @@ import 'package:image/image.dart' as img;
 import '../../../../core/models/detection_result.dart';
 
 /// Service for detecting avocado diseases using ML model
-/// TODO: Integrate with your actual TensorFlow Lite model (.tflite converted from .ckpt)
 class DetectionService {
   static final DetectionService instance = DetectionService._init();
-  
+
   bool _isModelLoaded = false;
-  // TODO: Add TFLite interpreter here when you convert your model
   // Interpreter? _interpreter;
 
   DetectionService._init();
@@ -18,10 +16,9 @@ class DetectionService {
   /// Initialize the ML model
   Future<void> loadModel() async {
     try {
-      // TODO: Load your TFLite model
       // Example:
       // _interpreter = await Interpreter.fromAsset('assets/models/avocado_disease_model.tflite');
-      
+
       _isModelLoaded = true;
       debugPrint('Model loaded successfully');
     } catch (e) {
@@ -50,7 +47,6 @@ class DetectionService {
       // Preprocess image for model
       final preprocessedImage = _preprocessImage(image);
 
-      // TODO: Run inference with your actual model
       // For now, using mock detection
       final prediction = await _runInference(preprocessedImage);
 
@@ -88,7 +84,7 @@ class DetectionService {
     for (int y = 0; y < 224; y++) {
       for (int x = 0; x < 224; x++) {
         final pixel = resizedImage.getPixel(x, y);
-        
+
         // Normalize RGB values to [0, 1] or [-1, 1] based on your model
         imageData[pixelIndex++] = pixel.r / 255.0;
         imageData[pixelIndex++] = pixel.g / 255.0;
@@ -99,25 +95,24 @@ class DetectionService {
     return imageData.buffer.asUint8List();
   }
 
-  /// Run model inference
-  /// TODO: Replace with actual model inference
   Future<Map<String, dynamic>> _runInference(Uint8List imageData) async {
-    // TODO: Replace this mock implementation with actual TFLite inference
     // Example with TFLite:
     // var input = imageData.reshape([1, 224, 224, 3]);
     // var output = List.filled(1 * 3, 0).reshape([1, 3]);
     // _interpreter.run(input, output);
-    
+
     // Mock prediction for demonstration
-    await Future.delayed(const Duration(seconds: 1)); // Simulate processing time
-    
+    await Future.delayed(
+      const Duration(seconds: 1),
+    ); // Simulate processing time
+
     // Simulate random prediction
     final predictions = [
       {'diseaseType': 'healthy', 'confidence': 0.95},
       {'diseaseType': 'mancha_negra', 'confidence': 0.87},
       {'diseaseType': 'rona', 'confidence': 0.82},
     ];
-    
+
     // Return random prediction (replace with actual model output)
     predictions.shuffle();
     return predictions.first;
@@ -125,7 +120,6 @@ class DetectionService {
 
   /// Dispose resources
   void dispose() {
-    // TODO: Close interpreter
     // _interpreter?.close();
     _isModelLoaded = false;
   }
