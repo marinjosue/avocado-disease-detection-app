@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 1120 840" width="1120" height="840" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, Arial, sans-serif" role="img" aria-label="Diagrama de casos de uso del prototipo Avocado IA">
+  <defs>
+    <marker id="uc" markerWidth="10" markerHeight="10" refX="8" refY="4.5" orient="auto">
+      <path d="M0,0 L8,4.5 L0,9" fill="none" stroke="#5A6B60" stroke-width="1.4"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1120" height="840" fill="#FFFFFF"/>
+
+  <!-- Título -->
+  <text x="40" y="44" font-size="19" font-weight="700" fill="#22312A">Diagrama de casos de uso — Avocado IA</text>
+  <text x="40" y="66" font-size="12" fill="#5A6B60">Detección on-device de enfermedades del aguacate</text>
+
+  <!-- Límite del sistema -->
+  <rect x="300" y="90" width="780" height="700" rx="10" fill="#FDFEFD" stroke="#B9CDC0" stroke-width="1.5"/>
+  <text x="690" y="118" font-size="13" font-weight="700" fill="#1F6B3B" text-anchor="middle">Sistema: Avocado IA (aplicación móvil)</text>
+
+  <!-- ===== Actor ===== -->
+  <circle cx="170" cy="350" r="16" fill="none" stroke="#22312A" stroke-width="2"/>
+  <line x1="170" y1="366" x2="170" y2="410" stroke="#22312A" stroke-width="2"/>
+  <line x1="145" y1="380" x2="195" y2="380" stroke="#22312A" stroke-width="2"/>
+  <line x1="170" y1="410" x2="148" y2="445" stroke="#22312A" stroke-width="2"/>
+  <line x1="170" y1="410" x2="192" y2="445" stroke="#22312A" stroke-width="2"/>
+  <text x="170" y="470" font-size="13" font-weight="600" fill="#22312A" text-anchor="middle">Agricultor</text>
+  <text x="170" y="488" font-size="11" fill="#5A6B60" text-anchor="middle">(usuario)</text>
+
+  <!-- Asociaciones actor -> casos de uso -->
+  <g stroke="#5A6B60" stroke-width="1.4">
+    <line x1="196" y1="352" x2="372" y2="170"/>
+    <line x1="198" y1="362" x2="372" y2="275"/>
+    <line x1="200" y1="374" x2="372" y2="380"/>
+    <line x1="200" y1="386" x2="372" y2="485"/>
+    <line x1="198" y1="398" x2="372" y2="590"/>
+    <line x1="196" y1="408" x2="372" y2="695"/>
+  </g>
+
+  <!-- ===== Columna 1: casos de uso principales ===== -->
+  <g>
+    <ellipse cx="490" cy="170" rx="118" ry="32" fill="#E8F2EB" stroke="#7FB894" stroke-width="1.4"/>
+    <text x="490" y="166" font-size="12" fill="#22312A" text-anchor="middle">Detectar enfermedad</text>
+    <text x="490" y="183" font-size="12" fill="#22312A" text-anchor="middle">del fruto (CNN)</text>
+
+    <ellipse cx="490" cy="275" rx="118" ry="32" fill="#E8F2EB" stroke="#7FB894" stroke-width="1.4"/>
+    <text x="490" y="271" font-size="12" fill="#22312A" text-anchor="middle">Consultar historial</text>
+    <text x="490" y="288" font-size="12" fill="#22312A" text-anchor="middle">de detecciones</text>
+
+    <ellipse cx="490" cy="380" rx="118" ry="32" fill="#E8F2EB" stroke="#7FB894" stroke-width="1.4"/>
+    <text x="490" y="376" font-size="12" fill="#22312A" text-anchor="middle">Ver estadísticas del</text>
+    <text x="490" y="393" font-size="12" fill="#22312A" text-anchor="middle">cultivo (dashboard)</text>
+
+    <ellipse cx="490" cy="485" rx="118" ry="32" fill="#E8F2EB" stroke="#7FB894" stroke-width="1.4"/>
+    <text x="490" y="481" font-size="12" fill="#22312A" text-anchor="middle">Calcular dosis</text>
+    <text x="490" y="498" font-size="12" fill="#22312A" text-anchor="middle">de tratamiento</text>
+
+    <ellipse cx="490" cy="590" rx="118" ry="32" fill="#E8F2EB" stroke="#7FB894" stroke-width="1.4"/>
+    <text x="490" y="586" font-size="12" fill="#22312A" text-anchor="middle">Consultar al asistente</text>
+    <text x="490" y="603" font-size="12" fill="#22312A" text-anchor="middle">de IA (texto / voz)</text>
+
+    <ellipse cx="490" cy="695" rx="118" ry="32" fill="#E8F2EB" stroke="#7FB894" stroke-width="1.4"/>
+    <text x="490" y="691" font-size="12" fill="#22312A" text-anchor="middle">Configurar la aplicación</text>
+    <text x="490" y="708" font-size="12" fill="#22312A" text-anchor="middle">(idioma, tema)</text>
+  </g>
+
+  <!-- ===== Columna 2: casos incluidos / extendidos ===== -->
+  <g>
+    <ellipse cx="890" cy="140" rx="112" ry="30" fill="#F6FAF7" stroke="#9DB8A8" stroke-width="1.3"/>
+    <text x="890" y="136" font-size="12" fill="#22312A" text-anchor="middle">Capturar o seleccionar</text>
+    <text x="890" y="153" font-size="12" fill="#22312A" text-anchor="middle">imagen del fruto</text>
+
+    <ellipse cx="890" cy="250" rx="112" ry="30" fill="#F6FAF7" stroke="#9DB8A8" stroke-width="1.3"/>
+    <text x="890" y="246" font-size="12" fill="#22312A" text-anchor="middle">Ver resultado y</text>
+    <text x="890" y="263" font-size="12" fill="#22312A" text-anchor="middle">recomendaciones</text>
+
+    <ellipse cx="890" cy="530" rx="112" ry="30" fill="#F6FAF7" stroke="#9DB8A8" stroke-width="1.3"/>
+    <text x="890" y="526" font-size="12" fill="#22312A" text-anchor="middle">Desbloquear acceso</text>
+    <text x="890" y="543" font-size="12" fill="#22312A" text-anchor="middle">con código</text>
+
+    <ellipse cx="890" cy="660" rx="112" ry="30" fill="#F6FAF7" stroke="#9DB8A8" stroke-width="1.3"/>
+    <text x="890" y="656" font-size="12" fill="#22312A" text-anchor="middle">Descargar modelo de IA</text>
+    <text x="890" y="673" font-size="12" fill="#22312A" text-anchor="middle">(solo la primera vez)</text>
+  </g>
+
+  <!-- ===== Relaciones include / extend ===== -->
+  <!-- Detectar -> Capturar imagen -->
+  <line x1="606" y1="158" x2="774" y2="144" stroke="#5A6B60" stroke-width="1.4" stroke-dasharray="6 4" marker-end="url(#uc)"/>
+  <text x="690" y="138" font-size="11.5" font-style="italic" fill="#5A6B60" text-anchor="middle">«include»</text>
+
+  <!-- Detectar -> Ver resultado -->
+  <line x1="606" y1="184" x2="774" y2="243" stroke="#5A6B60" stroke-width="1.4" stroke-dasharray="6 4" marker-end="url(#uc)"/>
+  <text x="686" y="200" font-size="11.5" font-style="italic" fill="#5A6B60" text-anchor="middle">«include»</text>
+
+  <!-- Asistente -> Desbloquear -->
+  <line x1="606" y1="578" x2="774" y2="537" stroke="#5A6B60" stroke-width="1.4" stroke-dasharray="6 4" marker-end="url(#uc)"/>
+  <text x="690" y="546" font-size="11.5" font-style="italic" fill="#5A6B60" text-anchor="middle">«include»</text>
+
+  <!-- Descargar modelo -> Asistente (extend) -->
+  <line x1="778" y1="650" x2="614" y2="603" stroke="#5A6B60" stroke-width="1.4" stroke-dasharray="6 4" marker-end="url(#uc)"/>
+  <text x="700" y="644" font-size="11.5" font-style="italic" fill="#5A6B60" text-anchor="middle">«extend»</text>
+
+  <!-- ===== Leyenda ===== -->
+  <rect x="40" y="560" width="220" height="220" rx="8" fill="#FFFFFF" stroke="#C7D4CB"/>
+  <text x="60" y="586" font-size="10.5" font-weight="700" letter-spacing="1.5" fill="#5A6B60">LEYENDA</text>
+
+  <ellipse cx="85" cy="612" rx="28" ry="13" fill="#E8F2EB" stroke="#7FB894"/>
+  <text x="125" y="616" font-size="11.5" fill="#22312A">Caso de uso</text>
+
+  <rect x="60" y="636" width="50" height="24" rx="4" fill="#FDFEFD" stroke="#B9CDC0"/>
+  <text x="125" y="652" font-size="11.5" fill="#22312A">Límite del sistema</text>
+
+  <line x1="60" y1="682" x2="108" y2="682" stroke="#5A6B60" stroke-width="1.4" marker-end="url(#uc)"/>
+  <text x="125" y="686" font-size="11.5" fill="#22312A">Asociación</text>
+
+  <line x1="60" y1="712" x2="108" y2="712" stroke="#5A6B60" stroke-width="1.4" stroke-dasharray="6 4" marker-end="url(#uc)"/>
+  <text x="125" y="708" font-size="11.5" fill="#22312A">«include» obligatorio</text>
+  <text x="125" y="723" font-size="11.5" fill="#22312A">«extend» opcional</text>
+
+  <circle cx="78" cy="748" r="8" fill="none" stroke="#22312A" stroke-width="1.6"/>
+  <line x1="78" y1="756" x2="78" y2="772" stroke="#22312A" stroke-width="1.6"/>
+  <line x1="68" y1="762" x2="88" y2="762" stroke="#22312A" stroke-width="1.6"/>
+  <text x="125" y="764" font-size="11.5" fill="#22312A">Actor</text>
+</svg>

@@ -1,172 +1,109 @@
 # Integración del Modelo de Machine Learning
 
-## 1. Convertir tu modelo de .ckpt a TensorFlow Lite (.tflite)
+**Estado: integrado y funcionando.** Este documento describe cómo quedó conectado el
+modelo real, no cómo conectarlo. Si reentrenas el modelo, lee la sección
+"Si reentrenas" al final: hay un detalle que rompe la app en silencio.
 
-Tu modelo actual está en formato `.ckpt` (checkpoint de TensorFlow). Para usarlo en Flutter, necesitas convertirlo a TensorFlow Lite.
+## 1. El modelo
 
-### Pasos para la conversión:
+Entrenado en [Entrenamiento_Aguacate_final.ipynb](https://drive.google.com/) (Colab),
+MobileNetV2 con transfer learning + fine-tuning:
 
-```python
-import tensorflow as tf
+| | |
+|---|---|
+| Archivo | `assets/models/avocado_disease_model.tflite` (3.16 MB) |
+| Arquitectura | MobileNetV2 (base ImageNet congelada, luego fine-tuning desde la capa 100) |
+| Entrada | `[1, 224, 224, 3]` float32, RGB escalado a **[0, 1]** |
+| Salida | `[1, 3]` float32, probabilidades softmax (suman 1) |
+| Cuantización | Dinámica (`tf.lite.Optimize.DEFAULT`); pesos int8, E/S float32 |
+| Dataset | 2 999 imágenes (≈1 000 por clase), split estratificado 70/15/15 |
+| Exactitud (test, Keras) | 96.23 % |
+| Exactitud (test, TFLite) | 96.01 % |
 
-# 1. Cargar tu modelo desde el checkpoint
-# (Asume que tienes la arquitectura del modelo definida)
-model = tf.keras.models.load_model('tu_modelo.h5')  # o reconstruir desde .ckpt
+## 2. El orden de las clases (lee esto)
 
-# 2. Convertir a TensorFlow Lite
-converter = tf.lite.TFLiteConverter.from_keras_model(model)
-converter.optimizations = [tf.lite.Optimize.DEFAULT]
-tflite_model = converter.convert()
+El notebook fija el orden con `CLASS_NAMES = ["mancha_negra", "ronia", "sana"]`, lo que
+produce `class_indices = {'mancha_negra': 0, 'ronia': 1, 'sana': 2}`.
 
-# 3. Guardar el modelo
-with open('avocado_disease_model.tflite', 'wb') as f:
-    f.write(tflite_model)
+La app usa otras claves (`'healthy'`, `'mancha_negra'`, `'rona'`), así que el mapeo
+índice → clave **no** es el orden "natural" que uno escribiría:
+
+```dart
+// lib/features/detection/data/services/detection_service.dart
+static const List<String> _labels = ['mancha_negra', 'rona', 'healthy'];
+//                                     ^index 0        ^1      ^2
 ```
 
-## 2. Agregar el modelo a tu proyecto Flutter
+Si se usara el orden alfabético/intuitivo `['healthy', 'mancha_negra', 'rona']`, el
+modelo seguiría funcionando sin lanzar ningún error, pero **acertaría el 1.7 % de las
+veces** en lugar del 98 %: llamaría "sano" a un fruto con mancha negra. Verificado
+ejecutando el `.tflite` sobre 120 imágenes reales del dataset.
 
-1. Copia el archivo `.tflite` a la carpeta `assets/models/`
-2. El archivo `pubspec.yaml` ya está configurado para incluir esta carpeta
+## 3. Preprocesamiento
 
-## 3. Instalar dependencias de TensorFlow Lite
+`DetectionService._preprocessImage()` replica exactamente lo que hizo
+`ImageDataGenerator(rescale=1./255)` con `target_size=(224, 224)`:
 
-Agrega al `pubspec.yaml`:
+1. `img.bakeOrientation()` — aplica la rotación EXIF de las fotos de cámara.
+2. `img.copyResize(224, 224, interpolation: linear)`.
+3. Cada canal RGB dividido entre 255 → `Float32List` de 224×224×3.
+
+No uses `mobilenet_v2.preprocess_input` ([-1, 1]): el modelo **no** se entrenó así.
+Medido sobre el dataset, [-1, 1] baja la exactitud del 98 % al 92 %.
+
+## 4. Dependencia y build
 
 ```yaml
-dependencies:
-  tflite_flutter: ^0.10.4
-  tflite_flutter_helper: ^0.3.1
+tflite_flutter: ^0.12.0   # usa LiteRT 1.4.0 (com.google.ai.edge.litert)
 ```
 
-Luego ejecuta:
-```bash
-flutter pub get
-```
+`tflite_flutter` 0.12.1 declara Java 11 en su `compileOptions` pero no fija
+`kotlinOptions.jvmTarget`, así que bajo el Kotlin integrado de Flutter sus tareas de
+Kotlin heredan el JDK por defecto (21) y Gradle aborta el build por desajuste de
+target. [android/build.gradle.kts](android/build.gradle.kts) fija el target de Kotlin
+de ese módulo a 11. Sin ese bloque, `flutter build apk` falla.
 
-## 4. Actualizar el DetectionService
+### Google Play — páginas de 16 KB
 
-Edita el archivo `lib/features/detection/data/services/detection_service.dart`:
+Las librerías nativas que aporta LiteRT (`libtensorflowlite_jni.so`,
+`libtensorflowlite_gpu_jni.so`) están alineadas a 16 KB en las tres ABI. Verificado
+leyendo los segmentos `LOAD` del ELF dentro del APK release: las 32 librerías
+empaquetadas cumplen. No hace falta excluir nada nuevo.
 
-```dart
-import 'package:tflite_flutter/tflite_flutter.dart';
-import 'package:tflite_flutter_helper/tflite_flutter_helper.dart';
+## 5. Verificación en el dispositivo
 
-class DetectionService {
-  static final DetectionService instance = DetectionService._init();
-  
-  Interpreter? _interpreter;
-  bool _isModelLoaded = false;
-
-  DetectionService._init();
-
-  Future<void> loadModel() async {
-    try {
-      _interpreter = await Interpreter.fromAsset(
-        'assets/models/avocado_disease_model.tflite',
-      );
-      _isModelLoaded = true;
-      debugPrint('Model loaded successfully');
-    } catch (e) {
-      debugPrint('Error loading model: $e');
-      _isModelLoaded = false;
-      rethrow;
-    }
-  }
-
-  Future<Map<String, dynamic>> _runInference(Uint8List imageData) async {
-    if (_interpreter == null) {
-      throw Exception('Model not loaded');
-    }
-
-    // Preparar input (ajusta según tu modelo)
-    var input = imageData.buffer.asFloat32List().reshape([1, 224, 224, 3]);
-    
-    // Preparar output (3 clases: healthy, mancha_negra, rona)
-    var output = List.filled(1 * 3, 0.0).reshape([1, 3]);
-    
-    // Ejecutar inferencia
-    _interpreter!.run(input, output);
-    
-    // Procesar resultados
-    final probabilities = output[0] as List<double>;
-    final maxProb = probabilities.reduce((a, b) => a > b ? a : b);
-    final maxIndex = probabilities.indexOf(maxProb);
-    
-    final diseaseTypes = ['healthy', 'mancha_negra', 'rona'];
-    
-    return {
-      'diseaseType': diseaseTypes[maxIndex],
-      'confidence': maxProb,
-    };
-  }
-
-  void dispose() {
-    _interpreter?.close();
-    _isModelLoaded = false;
-  }
-}
-```
-
-## 5. Configuración del modelo
-
-### Parámetros importantes a ajustar según tu modelo:
-
-- **Tamaño de entrada**: El código asume 224x224, ajusta si tu modelo usa otro tamaño
-- **Normalización**: Actualmente normaliza a [0, 1], ajusta si tu modelo requiere [-1, 1] o ImageNet normalization
-- **Número de clases**: Configurado para 3 clases (healthy, mancha_negra, rona)
-- **Orden de clases**: Asegúrate que coincida con el orden en que tu modelo fue entrenado
-
-## 6. Permisos necesarios
-
-### Android (`android/app/src/main/AndroidManifest.xml`):
-```xml
-<uses-permission android:name="android.permission.CAMERA"/>
-<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-```
-
-### iOS (`ios/Runner/Info.plist`):
-```xml
-<key>NSCameraUsageDescription</key>
-<string>Necesitamos acceso a la cámara para detectar enfermedades</string>
-<key>NSPhotoLibraryUsageDescription</key>
-<string>Necesitamos acceso a la galería para analizar imágenes</string>
-```
-
-## 7. Probar la aplicación
+[integration_test/detection_model_test.dart](integration_test/detection_model_test.dart)
+ejecuta el modelo **en el teléfono** sobre imágenes con diagnóstico conocido y falla si
+el mapeo de clases se rompe. Las imágenes se nombran con su clase real como prefijo
+(`mancha_negra_0.jpg`, `rona_0.jpg`, `healthy_0.jpg`):
 
 ```bash
-# Limpiar y obtener dependencias
-flutter clean
-flutter pub get
-
-# Ejecutar en dispositivo/emulador
-flutter run
+adb push <imagenes> /sdcard/Android/data/com.example.aplication_tesis/files/test_images/
+flutter test integration_test/detection_model_test.dart -d <device-id>
 ```
 
-## 8. Optimizaciones adicionales (opcional)
+Resultado en un Pixel 8 (Android 17) con 30 imágenes, 10 por clase:
 
-### Para mejor rendimiento:
-
-1. **Cuantización del modelo**:
-```python
-converter.optimizations = [tf.lite.Optimize.DEFAULT]
-converter.target_spec.supported_types = [tf.float16]
+```
+healthy:      10/10
+mancha_negra:  9/10
+rona:         10/10
+EXACTITUD GLOBAL: 29/30 (96.7%)
 ```
 
-2. **GPU Delegate** (para dispositivos compatibles):
-```dart
-final gpuDelegateV2 = GpuDelegateV2();
-final options = InterpreterOptions()..addDelegate(gpuDelegateV2);
-_interpreter = await Interpreter.fromAsset(
-  'assets/models/avocado_disease_model.tflite',
-  options: options,
-);
-```
+Coincide con el 96.23 % del conjunto de prueba del notebook, así que la app en el
+dispositivo reproduce el rendimiento medido en Colab.
 
-## Notas importantes
+## 6. Si reentrenas el modelo
 
-- El servicio actual usa un modelo mock para que puedas probar la aplicación
-- Una vez integres tu modelo real, reemplaza la función `_runInference()`
-- Asegúrate de que las clases de salida coincidan con los valores en `DetectionResult`
-- Prueba primero con imágenes de validación para verificar la precisión
+Antes de reemplazar el `.tflite`, comprueba estos tres puntos — cambiar cualquiera sin
+tocar el código Dart produce predicciones incorrectas **sin ningún error visible**:
+
+1. **`print(train_generator.class_indices)`** → si el orden cambia, actualiza
+   `DetectionService._labels`.
+2. **La normalización** → si dejas de usar `rescale=1./255`, actualiza
+   `_preprocessImage()`.
+3. **El tamaño de entrada** → si no es 224×224, actualiza `_inputSize`.
+
+La forma de entrada/salida real siempre se puede leer en tiempo de ejecución:
+`loadModel()` imprime `input:` y `output:` en el log al arrancar.

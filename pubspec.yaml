@@ -32,7 +32,10 @@ dependencies:
     sdk: flutter
   image: ^4.1.7
   image_picker: ^1.0.7
-  
+
+  # Inferencia del modelo CNN (MobileNetV2 -> .tflite)
+  tflite_flutter: ^0.12.0
+
   # Internacionalización
   intl: 0.20.2 
   
@@ -88,6 +91,8 @@ dependencies:
 
 dev_dependencies:
   flutter_test:
+    sdk: flutter
+  integration_test:
     sdk: flutter
 
   # The "flutter_lints" package below contains a set of recommended lints to
