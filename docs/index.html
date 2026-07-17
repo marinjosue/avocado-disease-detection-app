@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AvoScan AI — Descarga la app</title>
+<meta name="description" content="AvoScan AI: detección temprana de Mancha Negra y Roña en aguacate, con inteligencia artificial en tu propio celular.">
+<meta name="theme-color" content="#1F6B3B">
+<link rel="icon" href="avoscan-icon.png">
+
+<meta property="og:title" content="AvoScan AI — Detección de enfermedades en aguacate">
+<meta property="og:description" content="Detecta Mancha Negra y Roña con la cámara de tu celular. Funciona sin internet.">
+<meta property="og:image" content="avoscan-icon.png">
+<meta property="og:type" content="website">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --primary: #1F6B3B;
+    --primary-dark: #0E2E1C;
+    --accent: #26C281;
+    --bg: #F4F6F5;
+    --surface: #FFFFFF;
+    --text: #0E1C14;
+    --text-dim: #6B7B73;
+    --warning: #E0962F;
+    --border: rgba(14, 28, 20, 0.10);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --primary: #34B36A;
+      --primary-dark: #0E2E1C;
+      --accent: #2FD08C;
+      --bg: #0E1311;
+      --surface: #161D19;
+      --text: #ECF2EE;
+      --text-dim: #9CB0A6;
+      --warning: #F0A94A;
+      --border: rgba(236, 242, 238, 0.12);
+    }
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 32px 20px 48px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  main { max-width: 480px; margin: 0 auto; }
+
+  .hero { text-align: center; }
+  .logo {
+    width: 104px; height: 104px;
+    border-radius: 24px;
+    display: block; margin: 0 auto 20px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+  }
+  h1 {
+    font-size: 2rem; font-weight: 700;
+    margin: 0 0 8px; letter-spacing: -0.02em;
+  }
+  .tagline {
+    color: var(--text-dim);
+    font-size: 1.0625rem;
+    margin: 0 auto 20px;
+    max-width: 22em;
+  }
+  .meta {
+    display: inline-flex; gap: 8px;
+    font-size: 0.8125rem; color: var(--text-dim);
+    margin-bottom: 28px;
+  }
+  .meta span {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 4px 12px;
+  }
+
+  .btn {
+    display: block;
+    background: var(--primary);
+    color: #fff;
+    text-decoration: none;
+    font-size: 1.0625rem; font-weight: 600;
+    text-align: center;
+    padding: 17px 24px;
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(31, 107, 59, 0.30);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+  }
+  .btn:active { transform: scale(0.985); box-shadow: 0 2px 8px rgba(31,107,59,0.24); }
+  .btn small { display: block; font-weight: 400; font-size: 0.8125rem; opacity: 0.85; margin-top: 2px; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 18px 20px;
+    margin-top: 16px;
+  }
+  .card h2 {
+    font-size: 0.9375rem; font-weight: 600;
+    margin: 0 0 8px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .card p, .card ol { font-size: 0.875rem; color: var(--text-dim); margin: 0; }
+  .card ol { padding-left: 20px; }
+  .card ol li { margin-bottom: 4px; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; flex: none; }
+  .dot.warn { background: var(--warning); }
+  .dot.info { background: var(--accent); }
+
+  .features {
+    list-style: none; padding: 0;
+    margin: 28px 0 0;
+    display: grid; gap: 10px;
+  }
+  .features li {
+    display: flex; align-items: flex-start; gap: 10px;
+    font-size: 0.9375rem;
+  }
+  .features svg { flex: none; margin-top: 3px; color: var(--accent); }
+
+  #ios-notice { display: none; }
+  #ios-notice .card {
+    border-color: var(--warning);
+    background: color-mix(in srgb, var(--warning) 8%, var(--surface));
+  }
+  #ios-notice a { color: var(--primary); font-weight: 500; }
+
+  footer {
+    text-align: center;
+    margin-top: 36px;
+    font-size: 0.8125rem;
+    color: var(--text-dim);
+  }
+  footer a { color: var(--text-dim); }
+</style>
+</head>
+<body>
+<main>
+
+  <div class="hero">
+    <img src="avoscan-icon.png" alt="Logo de AvoScan AI" class="logo" width="104" height="104">
+    <h1>AvoScan AI</h1>
+    <p class="tagline">Detecta Mancha Negra y Roña en tu cultivo de aguacate con la cámara del celular.</p>
+    <div class="meta">
+      <span>Versión 1.0.0</span>
+      <span>114 MB</span>
+      <span>Android</span>
+    </div>
+  </div>
+
+  <div id="download-area">
+    <a class="btn" href="https://github.com/marinjosue/avocado-disease-detection-app/releases/latest/download/avoscan-ai.apk">
+      Descargar AvoScan AI
+      <small>Instalación directa · APK para Android</small>
+    </a>
+
+    <div class="card">
+      <h2><span class="dot warn"></span> Al instalar verás un aviso</h2>
+      <ol>
+        <li>Abre el archivo descargado.</li>
+        <li>Android dirá que no puede instalar apps de origen desconocido.</li>
+        <li>Toca <strong>Configuración</strong> y activa <strong>Permitir de esta fuente</strong>.</li>
+        <li>Vuelve atrás y toca <strong>Instalar</strong>.</li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <h2><span class="dot info"></span> Sobre el asistente de IA</h2>
+      <p>La detección de enfermedades funciona de una y sin internet. El asistente conversacional descarga su modelo (~500 MB) la primera vez que lo abres: conéctate a WiFi para eso.</p>
+    </div>
+  </div>
+
+  <div id="ios-notice">
+    <div class="card">
+      <h2><span class="dot warn"></span> Por ahora solo para Android</h2>
+      <p>AvoScan AI todavía no está disponible para iPhone. Puedes ver de qué se trata y cómo funciona en <a href="https://github.com/marinjosue/avocado-disease-detection-app">la página del proyecto</a>.</p>
+    </div>
+  </div>
+
+  <ul class="features">
+    <li>
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M6.5 11.5 3 8l1.06-1.06L6.5 9.38l5.44-5.44L13 5z"/></svg>
+      Diagnóstico en segundos, directo desde una foto de la hoja o el fruto.
+    </li>
+    <li>
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M6.5 11.5 3 8l1.06-1.06L6.5 9.38l5.44-5.44L13 5z"/></svg>
+      Funciona sin señal: la IA corre dentro de tu celular, no en la nube.
+    </li>
+    <li>
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M6.5 11.5 3 8l1.06-1.06L6.5 9.38l5.44-5.44L13 5z"/></svg>
+      Recomendaciones de tratamiento para cada enfermedad detectada.
+    </li>
+    <li>
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M6.5 11.5 3 8l1.06-1.06L6.5 9.38l5.44-5.44L13 5z"/></svg>
+      Historial y estadísticas de tu huerto, guardados en el dispositivo.
+    </li>
+  </ul>
+
+  <footer>
+    <p>Proyecto de titulación · Universidad de las Fuerzas Armadas ESPE<br>
+    <a href="https://github.com/marinjosue/avocado-disease-detection-app">Código fuente en GitHub</a></p>
+  </footer>
+
+</main>
+
+<script>
+  if (/iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) {
+    document.getElementById('download-area').style.display = 'none';
+    document.getElementById('ios-notice').style.display = 'block';
+  }
+</script>
+</body>
+</html>
